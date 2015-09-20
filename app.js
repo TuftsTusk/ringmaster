@@ -57,7 +57,7 @@ app.get('/getListings', function(request,response){
 	});
 });
 
-app.get('/getListing/:uid', function(request,response){
+app.get('/getListings/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
   var uid = request.params.uid;
 	db.collection('tusk').find({uid: uid}).toArray(function(error, listings) {
