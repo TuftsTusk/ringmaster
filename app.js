@@ -6,6 +6,7 @@ var uuid = require('uuid');
 var MongoClient = require('mongodb').MongoClient, format = require('util').format;
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors')
 
 var app = express();
 
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
+
 // Mongo initialization and connect to database
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
@@ -23,11 +25,9 @@ var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 });
 
 //enable CORS
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+app.use(cors())
+
+
 
 app.get('/', function(request, response){
   response.send('Hey there buddy!');
@@ -128,6 +128,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 8080);
 
 module.exports = app;
