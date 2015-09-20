@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'jade');
 // Mongo initialization and connect to database
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
@@ -26,6 +27,7 @@ app.get('/', function(request, response){
 })
 
 app.post('/addListing', function(request, response) {
+  response.set('Content-Type', 'application/json');
 	var name = request.body.name;
 	var description = request.body.description;
   var price = request.body.price;
@@ -45,7 +47,20 @@ app.post('/addListing', function(request, response) {
   });
 });
 app.get('/getListings', function(request,response){
+  response.set('Content-Type', 'application/json');
 	db.collection('tusk').find().toArray(function(error, listings) {
+    if (listings){
+      response.send(listings);
+    } else {
+      response.send('{}');
+    }
+	});
+});
+
+app.get('/getListing/:uid', function(request,response){
+  response.set('Content-Type', 'application/json');
+  var uid = request.params.uid;
+	db.collection('tusk').find({uid: uid}).toArray(function(error, listings) {
     console.log(listings);
     if (listings){
       response.send(listings);
