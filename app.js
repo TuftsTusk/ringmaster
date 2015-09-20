@@ -45,7 +45,7 @@ app.post('/addListing', function(request, response) {
   });
 });
 app.get('/getListings', function(request,response){
-	db.collection('tusk').find({}, function(error, listings) {
+	db.collection('tusk').find().toArray(function(error, listings) {
     console.log(listings);
     if (listings && listings.data){
       response.send(listings.data);
