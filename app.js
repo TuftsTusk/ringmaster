@@ -66,7 +66,7 @@ app.get('/getListings', function(request,response){
   response.set('Content-Type', 'application/json');
 	db.collection('tusk').find().toArray(function(error, listings) {
     if (listings){
-      response.send(listings);
+      response.send(listings.reverse());
     } else {
       response.send('{}');
     }
