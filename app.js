@@ -1,12 +1,13 @@
+var uuid = require('uuid');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-var uuid = require('uuid');
+var cors = require('cors');
 var MongoClient = require('mongodb').MongoClient, format = require('util').format;
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var cors = require('cors')
+
 
 var app = express();
 
