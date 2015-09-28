@@ -1,100 +1,106 @@
-var uuid = require('uuid');
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cors = require('cors');
-var MongoClient = require('mongodb').MongoClient, format = require('util').format;
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+// Plugins
+var uuid = require('uuid')
+express = require('express'),
+path = require('path'),
+favicon = require('serve-favicon'),
+logger = require('morgan'),
+cors = require('cors'),
+MongoClient = require('mongodb').MongoClient, format = require('util').format,
+cookieParser = require('cookie-parser'),
+bodyParser = require('body-parser'),
+mongoose = require('mongoose');
+// load Schema
+var Listing = require('./models/listing.js')
 
-
+// Configuration
 var app = express();
-
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
+app.use(cors());
 
-// Mongo initialization and connect to database
+// Database
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
-var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
-	db = databaseConnection;
-});
-
-//enable CORS
-app.use(cors())
-
+mongoose.connect(mongoUri);
 
 
 app.get('/', function(request, response){
   response.send('Hey there buddy!');
-})
+});
+
+
 
 app.post('/addListing', function(request, response) {
   response.set('Content-Type', 'application/json');
-	var name = request.body.name;
-	var description = request.body.description;
-  var price = request.body.price;
-  var user = request.body.user;
-  var image = request.body.image;
-  var date = new Date();
-  var uid = uuid.v1();
-  db.collection('tusk', function(error1, coll) {
-    if (!name || !description || !price || !name || !image || !user ) {
-      response.send(JSON.stringify({success: false, message:
+	var uid = uuid.v1();
+	var listing = new Listing;
+	listing.uuid = uid;
+	listing.name = request.body.name;
+	listing.description = request.body.description;
+	listing.user = request.body.user;
+	listing.price = request.body.price;
+	listing.imageURL = request.body.image;
+
+	listing.save(function(err){
+		if (!err){
+			return response.send(JSON.stringify({success: true, message:
+				request.protocol + '://' + request.get('host') + '/getListings/' + uid}));
+		} else {
+			return response.send(JSON.stringify({success: false, message:
                       'Invalid elements in body'}));
-    } else {
-      var listing = coll.insert({uid:uid,
-                                name:name,
-                                image: image,
-                                description:description,
-                                user: user,
-                                price: price,
-                                created_at: date}, function(error, saved) {
-                                  response.send(JSON.stringify({success: true, message:
-                                    request.protocol + '://' + request.get('host') + '/getListings/' + uid}));
-      });
-    }
-  });
+		}
+	});
 });
 
 app.get('/getListings', function(request,response){
   response.set('Content-Type', 'application/json');
-	db.collection('tusk').find().toArray(function(error, listings) {
-    if (listings){
-      response.send(listings.reverse());
-    } else {
-      response.send('{}');
-    }
+	 return Listing.find(function (err, listings) {
+	    if (!err){
+	      response.send(listings.reverse());
+	    } else {
+	      response.send('{}');
+	    }
 	});
+});
+
+app.get('/search/:vars/:val', function(request,response){
+  response.set('Content-Type', 'application/json');
+	var vars = "uuid";
+	var val = request.params.val;
+	return Listing.find({uuid:val}, function (err, listing) {
+	    if (!err){
+	      response.send(listing);
+	    } else {
+	      response.send('{}');
+	    }
+	})
 });
 
 app.get('/getListings/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
-  var uid = request.params.uid;
-	db.collection('tusk').find({uid: uid}).toArray(function(error, listings) {
-    if (listings){
-      response.send(listings);
-    } else {
-      response.send('{}');
-    }
-	});
+	var uid = request.params.uid;
+	return Listing.find({uuid:uid}, function (err, listing) {
+	    if (!err){
+	      response.send(listing);
+	    } else {
+	      response.send('{}');
+	    }
+	})
 });
 
 app.delete('/getListings/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
-  var uid = request.params.uid;
-	db.collection('tusk').remove({uid: uid}, function(error, num) {
-    if (error){
-      response.send(JSON.stringify(error));
-    } else {
-      response.send(JSON.stringify(num));
-    }
-	});
+	var uid = request.params.uid;
+	return Listing.findOneAndRemove({uuid:uid}).remove(function (err, listing) {
+	    if (!err){
+	      response.send(listing);
+	    } else {
+	      response.send(err);
+	    }
+	})
 });
 
 
