@@ -28,7 +28,7 @@ mongoose.connect(mongoUri);
 
 
 app.get('/', function(request, response){
-  response.send('Hey there buddy!');
+  response.send('Hey there bud!');
 });
 
 
