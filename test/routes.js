@@ -10,8 +10,9 @@ describe('Array', function() {
   });
 });
 describe('GET /getListings', function(){
+  console.log(process.env.PORT);
   it('should respond with json', function(done){
-    request('http://localhost:8080')
+    request('http://localhost:'+process.env.PORT)
       .get('/getListings')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
