@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "forever start app.js",
+    "start": "node app.js",
     "test": "mocha test/*.js"
   },
   "dependencies": {

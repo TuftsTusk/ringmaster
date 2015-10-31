@@ -31,8 +31,6 @@ app.get('/', function(request, response){
   response.send('Hey there bud!');
 });
 
-
-
 app.post('/addListing', function(request, response) {
   response.set('Content-Type', 'application/json');
 	var uid = uuid.v1();
