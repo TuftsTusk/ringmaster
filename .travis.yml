@@ -2,6 +2,6 @@ language: node_js
 services: mongodb
 before_script:
   - "npm install -g forever"
-  - "npm start"
+  - "forever start app.js"
 after_script:
   - "forever stopall"
