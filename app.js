@@ -33,7 +33,7 @@ app.get('/', function(request, response){
 
 
 
-app.post('/addListing', function(request, response) {
+app.post('/isting', function(request, response) {
   response.set('Content-Type', 'application/json');
 	var uid = uuid.v1();
 	var listing = new Listing;
@@ -55,7 +55,7 @@ app.post('/addListing', function(request, response) {
 	});
 });
 
-app.get('/getListings', function(request,response){
+app.get('/listing', function(request,response){
   response.set('Content-Type', 'application/json');
 	 return Listing.find(function (err, listings) {
 	    if (!err){
@@ -79,7 +79,7 @@ app.get('/search/:vars/:val', function(request,response){
 	})
 });
 
-app.get('/getListings/:uid', function(request,response){
+app.get('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
 	var uid = request.params.uid;
 	return Listing.find({uuid:uid}, function (err, listing) {
@@ -91,7 +91,7 @@ app.get('/getListings/:uid', function(request,response){
 	})
 });
 
-app.delete('/getListings/:uid', function(request,response){
+app.delete('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
 	var uid = request.params.uid;
 	return Listing.findOneAndRemove({uuid:uid}).remove(function (err, listing) {
