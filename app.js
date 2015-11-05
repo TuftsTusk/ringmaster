@@ -33,24 +33,28 @@ app.get('/', function(request, response){
 
 
 
-app.post('/isting', function(request, response) {
+app.post('/listing', function(request, response) {
   response.set('Content-Type', 'application/json');
 	var uid = uuid.v1();
 	var listing = new Listing;
-	listing.uuid = uid;
-	listing.name = request.body.name;
-	listing.description = request.body.description;
-	listing.user = request.body.user;
-	listing.price = request.body.price;
-	listing.imageURL = request.body.image;
+	listing.user_id = 0;
+	listing.address = request.body.address;
+        listing.date_range = request.body.date_range;
+        listing.rent = request.body.rent;
+        listing.bedrooms_available = request.body.bedrooms;
+        listing.bathrooms = request.body.bathrooms;
+        listing.image_gallery_link = ('image_gallery_link' in request.body) ? request.body.image_gallery_link : "";
+        listing.est_utilities = ('est_utilities' in request.body) ? request.body.est_utilities : "";
+        listing.notes = ('notes' in request.body) ? request.body.notes : "";
+
 
 	listing.save(function(err){
 		if (!err){
 			return response.send(JSON.stringify({success: true, message:
-				request.protocol + '://' + request.get('host') + '/getListings/' + uid}));
+				request.protocol + '://' + request.get('host') + '/listing/' + listing._id}));
 		} else {
 			return response.send(JSON.stringify({success: false, message:
-                      'Invalid elements in body'}));
+                      'Invalid elements in body'+err}));
 		}
 	});
 });
@@ -68,9 +72,8 @@ app.get('/listing', function(request,response){
 
 app.get('/search/:vars/:val', function(request,response){
   response.set('Content-Type', 'application/json');
-	var vars = "uuid";
 	var val = request.params.val;
-	return Listing.find({uuid:val}, function (err, listing) {
+	return Listing.find({_id:val}, function (err, listing) {
 	    if (!err){
 	      response.send(listing);
 	    } else {
@@ -82,7 +85,7 @@ app.get('/search/:vars/:val', function(request,response){
 app.get('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
 	var uid = request.params.uid;
-	return Listing.find({uuid:uid}, function (err, listing) {
+	return Listing.find({_id:uid}, function (err, listing) {
 	    if (!err){
 	      response.send(listing);
 	    } else {
@@ -94,7 +97,7 @@ app.get('/listing/:uid', function(request,response){
 app.delete('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
 	var uid = request.params.uid;
-	return Listing.findOneAndRemove({uuid:uid}).remove(function (err, listing) {
+	return Listing.findOneAndRemove({_id:uid}).remove(function (err, listing) {
 	    if (!err){
 	      response.send(listing);
 	    } else {
@@ -135,6 +138,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(process.env.PORT || 8080);
+app.listen(process.env.PORT || 3000);
 
 module.exports = app;
