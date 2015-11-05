@@ -26,6 +26,9 @@ app.use(cors());
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
+app.get('/alive', function(request, response){
+  return response.send('yes thank you');
+});
 
 app.post('/addListing', function(request, response) {
   response.set('Content-Type', 'application/json');
