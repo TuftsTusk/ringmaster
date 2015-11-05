@@ -27,10 +27,6 @@ var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://
 mongoose.connect(mongoUri);
 
 
-app.get('/', function(request, response){
-  response.send('Hey there bud!');
-});
-
 app.post('/addListing', function(request, response) {
   response.set('Content-Type', 'application/json');
 	var uid = uuid.v1();
