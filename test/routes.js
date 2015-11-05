@@ -12,7 +12,7 @@ describe('Array', function() {
 describe('GET /getListings', function(){
   console.log(process.env.PORT);
   it('should respond with json', function(done){
-    request('http://tuftstusk.herokuapp.com')
+    request('http://localhost:3000/getListings')
       .get('/getListings')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
