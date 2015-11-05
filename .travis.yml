@@ -3,6 +3,6 @@ services: mongodb
 before_script:
   - "npm install -g forever"
   - "forever start app.js"
-  - sleep 5
+  - sh alive.sh
 after_script:
   - "forever stopall"
