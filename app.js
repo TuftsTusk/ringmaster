@@ -26,11 +26,9 @@ app.use(cors());
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
-
-app.get('/', function(request, response){
-  response.send('Hey there bud!');
+app.get('/alive', function(request, response){
+  return response.send('yes thank you');
 });
-
 
 
 app.post('/listing', function(request, response) {
