@@ -1,5 +1,6 @@
 var assert = require('assert');
 var request = require('supertest');
+var app = require('../app.js');
 //sample test
 describe('Array', function() {
   describe('#indexOf()', function () {
@@ -9,6 +10,8 @@ describe('Array', function() {
     });
   });
 });
+
+//routes test
 describe('GET /getListings', function(){
   console.log(process.env.PORT);
   it('should respond with json', function(done){
