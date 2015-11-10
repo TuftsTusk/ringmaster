@@ -46,8 +46,7 @@ app.post('/addListing', function(request, response) {
 			return response.send(JSON.stringify({success: true, message:
 				request.protocol + '://' + request.get('host') + '/getListings/' + uid}));
 		} else {
-			return response.send(JSON.stringify({success: false, message:
-                      'Invalid elements in body'}));
+			return response.send({"success": "false", "message":"Invalid elements in body"});
 		}
 	});
 });

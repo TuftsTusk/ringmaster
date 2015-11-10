@@ -1,3 +1,4 @@
+var expect = require('expect.js');
 var assert = require('assert');
 var request = require('supertest');
 var app = require('../app.js');
@@ -15,7 +16,7 @@ describe('Array', function() {
 describe('GET /getListings', function(){
   console.log(process.env.PORT);
   it('should respond with json', function(done){
-    request('http://localhost:3000/getListings')
+    request(app)
       .get('/getListings')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
