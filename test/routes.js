@@ -13,11 +13,10 @@ describe('Array', function() {
 });
 
 //routes test
-describe('GET /getListings', function(){
-  console.log(process.env.PORT);
+describe('GET /listing', function(){
   it('should respond with json', function(done){
     request(app)
-      .get('/getListings')
+      .get('/listing')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, done);
