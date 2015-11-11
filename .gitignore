@@ -31,3 +31,7 @@ build/Release
 node_modules
 # Mac
 .DS_Store
+
+# Ignore vim temp files
+*.*~
+

@@ -9,11 +9,11 @@ describe('Array', function() {
     });
   });
 });
-describe('GET /getListings', function(){
+describe('GET /listing', function(){
   console.log(process.env.PORT);
   it('should respond with json', function(done){
-    request('http://localhost:3000/getListings')
-      .get('/getListings')
+    request('http://localhost:3000/listing')
+      .get('/listing')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, done);
