@@ -8,7 +8,8 @@ cors = require('cors'),
 MongoClient = require('mongodb').MongoClient, format = require('util').format,
 cookieParser = require('cookie-parser'),
 bodyParser = require('body-parser'),
-mongoose = require('mongoose');
+mongoose = require('mongoose'),
+validator = require('validator');
 // load Schema
 var Listing = require('./models/listing.js')
 
