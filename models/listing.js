@@ -6,7 +6,7 @@ var ListingSchema = new Schema({
     address: { type: String, required: true },
     date_range: { type: String, required: true },
     rent: { type: Number, required: true },
-    bedrooms_available: { type: Number, required: true, default: 1 },
+    bedrooms_available: { type: Number, required: false, default: 1 },
     bathrooms: { type: Number, required: true },
     image_gallery_link: { type: String, required: false },
     est_utilities: { type: Number, required: false },

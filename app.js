@@ -10,6 +10,11 @@ cookieParser = require('cookie-parser'),
 bodyParser = require('body-parser'),
 mongoose = require('mongoose'),
 validator = require('validator');
+
+// Session related plugins
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+
 // load Schema
 var Listing = require('./models/listing.js')
 
@@ -27,17 +32,26 @@ app.use(cors());
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
+app.use(session({
+    secret: 'foo',
+    saveUninitialized: false,
+    resave: true,
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection
+    })
+}));
+
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
 
-
-app.post('/listing', function(request, response) {
-  response.set('Content-Type', 'application/json');
-	var uid = uuid.v1();
-	var listing = new Listing;
-	listing.user_id = 0;
-	listing.address = request.body.address;
+app.route('/listing')
+    .post(function(request, response) {
+      response.set('Content-Type', 'application/json');
+        var uid = uuid.v1();
+        var listing = new Listing;
+        listing.user_id = 0;
+        listing.address = request.body.address;
         listing.date_range = request.body.date_range;
         listing.rent = request.body.rent;
         listing.bedrooms_available = request.body.bedrooms;
@@ -47,26 +61,24 @@ app.post('/listing', function(request, response) {
         listing.notes = ('notes' in request.body) ? request.body.notes : "";
 
 
-	listing.save(function(err){
-		if (!err){
-			return response.send(JSON.stringify({success: true, message:
-				request.protocol + '://' + request.get('host') + '/listing/' + listing._id}));
-		} else {
-			return response.send({"success": "false", "message":"Invalid elements in body"});
-		}
-	});
-});
-
-app.get('/listing', function(request,response){
-  response.set('Content-Type', 'application/json');
-	 return Listing.find(function (err, listings) {
-	    if (!err){
-	      response.send(listings.reverse());
-	    } else {
-	      response.send('{}');
-	    }
-	});
-});
+        listing.save(function(err){
+            if (!err) {
+                return response.send(JSON.stringify({success: true, rsc_id: listing._id}));
+            } else {
+                return response.send(JSON.stringify({success: false, message:err}));
+            }
+        });
+    })
+    .get(function(request,response){
+      response.set('Content-Type', 'application/json');
+         return Listing.find(function (err, listings) {
+            if (!err){
+              response.send(listings.reverse());
+            } else {
+              response.send('{}');
+            }
+        });
+    });
 
 app.get('/search/:vars/:val', function(request,response){
   response.set('Content-Type', 'application/json');
