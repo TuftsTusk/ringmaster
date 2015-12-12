@@ -12,6 +12,7 @@ mongoose = require('mongoose'),
 validator = require('validator');
 // load Schema
 var Listing = require('./models/listing.js')
+var emails = require('./models/emails.js')
 
 // Configuration
 var app = express();
@@ -30,6 +31,22 @@ mongoose.connect(mongoUri);
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
+
+app.post('/addEmail',  function(request, response) {
+  response.set('Content-Type', 'application/json');
+	var uid = uuid.v1();
+	var email = new emails;
+	email.user_id = uid;
+	email.email = request.body.email;
+
+	email.save(function(err){
+		if (!err){
+			return response.send(JSON.stringify({success: true, message:"success"}));
+		} else {
+			return response.send({"success": "false", "message":"Invalid elements in body"});
+		}
+	});
+}); 
 
 
 app.post('/listing', function(request, response) {
