@@ -9,14 +9,17 @@ MongoClient = require('mongodb').MongoClient, format = require('util').format,
 cookieParser = require('cookie-parser'),
 bodyParser = require('body-parser'),
 mongoose = require('mongoose'),
-validator = require('validator');
+validator = require('validator'),
+bcrypt = require('bcrypt-nodejs'),
+mailer = require('nodemailer');
 
 // Session related plugins
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 
 // load Schema
-var Listing = require('./models/listing.js')
+var Listing = require('./models/listing.js');
+var User = require('./models/user.js');
 
 // Configuration
 var app = express();
@@ -32,6 +35,27 @@ app.use(cors());
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
+var checkForKeys = function(keys, variable) {
+    if (keys instanceof Array) {
+        for (i=0; i<keys.length; i++) {
+            if (!(keys[i] in variable))
+                return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+function validateEmail(email) {
+    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    return re.test(email);
+}
+
+function validateTuftsEmail(email) {
+    var re = /^.*@(\w+\.)?tufts.edu$/i;
+    return validateEmail(email) && re.test(email);
+}
+
 app.use(session({
     secret: 'foo',
     saveUninitialized: false,
@@ -41,13 +65,99 @@ app.use(session({
     })
 }));
 
+app.post('/user/register', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    if (!checkForKeys(["email", "password", "confirmpass"], request.body)) {
+        return response.send(JSON.stringify({success: false, message: "One or more of the registration fields was missing"}));
+    } else {
+        var email = request.body.email;
+        if (!validateTuftsEmail(email)) {
+            return response.send({success: false, message: "Email must be a tufts email"});
+        } else {
+            User.findOne({email:email}, function(err, user) {
+                if (user) {
+                    return response.send({success: false, message: "Email is already in use"});
+                }
+                var password = request.body.password;
+                if (password != request.body.confirmpass) {
+                    return response.send({success: false, message: "Passwords did not match"});
+                } else {
+                    var newuser = new User;
+
+                    newuser.email = request.body.email;
+
+                    var salt = bcrypt.genSaltSync(10);
+
+                    newuser.passwordSalt = salt;
+                    newuser.passwordHash = bcrypt.hashSync(password, salt);
+
+                    //TODO: Generate and send confirmation email
+                    //      also create a new model for an unconfirmed user
+                    
+                    newuser.save(function(err) {
+                        if (!err) {
+                            return response.send(JSON.stringify({success: true, email: newuser.email}));
+                        } else {
+                            return response.send(JSON.stringify({success: false, message: err}));
+                        }
+                    });
+                }
+            });
+        }
+    }
+});
+
+// for debug only!!! not a real endpoint!
+app.delete('/user/:email', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    User.find({email:request.params.email}, function(err, user) {
+        if (err) {
+            return reponse.send(JSON.stringify({success: false}));
+        } else {
+            User.findOneAndRemove({email:request.params.email}, function(err) {
+                if (err) {
+                    return response.send(JSON.stringify({success: false, message:err}));
+                } else {
+                    return response.send(JSON.stringify({success: true}));
+                }
+            });
+        }
+    });
+});
+
+app.post('/user/login', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    if ("login" in request.session && "tries" in request.session.login) {
+        var diff = Date.now() - request.session.login.when;
+        if (diff > (3 * 60 * 1000))
+            delete request.session.login;
+        else if (request.session.login.tries > 5) {
+            return response.send(JSON.stringify({success: false, message: "Too many login attempts. Wait a few minutes and try again."}));
+        }
+    }
+    User.findOne({email:request.body.email}, function(err, user) {
+        if (err) {
+            reponse.send(JSON.stringify({success: false, message: err}));
+        } else {
+            if (user && bcrypt.hashSync(request.body.password, user.passwordSalt) === user.passwordHash) {
+                request.session.login = {valid: true, when: Date.now()};
+                return response.send(JSON.stringify({success: true, message: "Logged in successfully"}));
+            } else {
+                var t = (request.session.login != undefined && "tries" in request.session.login)?(request.session.login.tries+1):1;
+                request.session.login = {valid: false, tries: t, when: Date.now()};
+                return response.send(JSON.stringify({success: false, message: "Email/password combo was incorrect"}));
+            }
+        }
+    });
+});
+
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
 
 app.route('/listing')
     .post(function(request, response) {
-      response.set('Content-Type', 'application/json');
+        response.set('Content-Type', 'application/json');
         var uid = uuid.v1();
         var listing = new Listing;
         listing.user_id = 0;
@@ -73,9 +183,9 @@ app.route('/listing')
       response.set('Content-Type', 'application/json');
          return Listing.find(function (err, listings) {
             if (!err){
-              response.send(listings.reverse());
+              return response.send(listings.reverse());
             } else {
-              response.send('{}');
+              return response.send('{}');
             }
         });
     });
@@ -89,7 +199,7 @@ app.get('/search/:vars/:val', function(request,response){
 	    } else {
 	      response.send('{}');
 	    }
-	})
+	});
 });
 
 app.get('/listing/:uid', function(request,response){
@@ -101,7 +211,7 @@ app.get('/listing/:uid', function(request,response){
 	    } else {
 	      response.send('{}');
 	    }
-	})
+	});
 });
 
 app.delete('/listing/:uid', function(request,response){
@@ -113,9 +223,8 @@ app.delete('/listing/:uid', function(request,response){
 	    } else {
 	      response.send(err);
 	    }
-	})
+	});
 });
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
