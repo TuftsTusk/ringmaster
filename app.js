@@ -32,7 +32,7 @@ app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
 
-app.post('/addEmail',  function(request, response) {
+app.post('/email',  function(request, response) {
   response.set('Content-Type', 'application/json');
 	var uid = uuid.v1();
 	var email = new emails;
@@ -46,8 +46,19 @@ app.post('/addEmail',  function(request, response) {
 			return response.send({"success": "false", "message":"Invalid elements in body"});
 		}
 	});
-}); 
+});
 
+
+app.get('/email', function(request,response){
+  response.set('Content-Type', 'application/json');
+	 return emails.find(function (err, email) {
+	    if (!err){
+	      response.send(email.reverse());
+	    } else {
+	      response.send('{}');
+	    }
+	});
+});
 
 app.post('/listing', function(request, response) {
   response.set('Content-Type', 'application/json');
