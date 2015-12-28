@@ -19,7 +19,11 @@ var MongoStore = require('connect-mongo')(session);
 
 // load Schema
 var Listing = require('./models/listing.js');
+var Unconf_User = require('./models/unconf_user.js');
 var User = require('./models/user.js');
+
+// Tusk Libraries
+var Validate = require('./lib/validation.js');
 
 // Configuration
 var app = express();
@@ -35,27 +39,6 @@ app.use(cors());
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
-var checkForKeys = function(keys, variable) {
-    if (keys instanceof Array) {
-        for (i=0; i<keys.length; i++) {
-            if (!(keys[i] in variable))
-                return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-function validateEmail(email) {
-    var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-    return re.test(email);
-}
-
-function validateTuftsEmail(email) {
-    var re = /^.*@(\w+\.)?tufts.edu$/i;
-    return validateEmail(email) && re.test(email);
-}
-
 app.use(session({
     secret: 'foo',
     saveUninitialized: false,
@@ -67,21 +50,45 @@ app.use(session({
 
 app.post('/user/register', function(request, response) {
     response.set('Content-Type', 'application/json');
-    if (!checkForKeys(["email", "password", "confirmpass"], request.body)) {
-        return response.send(JSON.stringify({success: false, message: "One or more of the registration fields was missing"}));
+    if (!Validate.checkForKeys(["email", "password", "confirmpass"], request.body)) {
+        return response.send(JSON.stringify({
+            success: false,
+            type: 'MISSING_REGISTRATION_FIELD_FAILURE',
+            message: "One or more of the registration fields was missing"
+        }));
     } else {
         var email = request.body.email;
-        if (!validateTuftsEmail(email)) {
-            return response.send({success: false, message: "Email must be a tufts email"});
+        if (!Validate.validateTuftsEmail(email)) {
+            return response.send({
+                success: false,
+                type: 'TUFTS_EMAIL_VALIDATION_FAILURE',
+                message: 'Email must be a tufts email'
+            });
         } else {
             User.findOne({email:email}, function(err, user) {
                 if (user) {
-                    return response.send({success: false, message: "Email is already in use"});
+                    return response.send({
+                        success: false,
+                        type: 'EMAIL_IN_USE_FAILURE',
+                        message: 'Email is already in use'
+                    });
                 }
                 var password = request.body.password;
                 if (password != request.body.confirmpass) {
-                    return response.send({success: false, message: "Passwords did not match"});
+                    return response.send({
+                        success: false,
+                        type: 'PASSWORD_MISMATCH_FAILURE',
+                        message: "Passwords did not match"
+                    });
                 } else {
+/*                    Unconf_User.findOne({email: email}, function(err, user) {
+                        if (user) {
+
+                        } else {
+
+                        }
+                    });
+*/
                     var newuser = new User;
 
                     newuser.email = request.body.email;
@@ -98,7 +105,11 @@ app.post('/user/register', function(request, response) {
                         if (!err) {
                             return response.send(JSON.stringify({success: true, email: newuser.email}));
                         } else {
-                            return response.send(JSON.stringify({success: false, message: err}));
+                            return response.send(JSON.stringify({
+                                success: false,
+                                type: 'DISK_SAVE_FAILURE',
+                                message: err
+                            }));
                         }
                     });
                 }
@@ -114,11 +125,11 @@ app.delete('/user/:email', function(request, response) {
         if (err) {
             return reponse.send(JSON.stringify({success: false}));
         } else {
-            User.findOneAndRemove({email:request.params.email}, function(err) {
+            User.findOneAndRemove({email:request.params.email}, function(err, resp) {
                 if (err) {
                     return response.send(JSON.stringify({success: false, message:err}));
                 } else {
-                    return response.send(JSON.stringify({success: true}));
+                    return response.send(JSON.stringify({success: true, user:resp}));
                 }
             });
         }
@@ -157,6 +168,9 @@ app.get('/alive', function(request, response){
 
 app.route('/listing')
     .post(function(request, response) {
+        
+
+
         response.set('Content-Type', 'application/json');
         var uid = uuid.v1();
         var listing = new Listing;

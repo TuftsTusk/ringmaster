@@ -14,6 +14,7 @@ describe('Account lifecycle', function() {
             if (err) done(err);
             var body = res.body;
             expect(body.success).to.equal(false);
+            expect(body.type).to.equal('MISSING_REGISTRATION_FIELD_FAILURE');
             done();
         });
     });
@@ -28,6 +29,7 @@ describe('Account lifecycle', function() {
             if (err) done(err);
             var body = res.body;
             expect(body.success).to.equal(false);
+            expect(body.type).to.equal('TUFTS_EMAIL_VALIDATION_FAILURE');
             done();
         });
     });
@@ -42,6 +44,7 @@ describe('Account lifecycle', function() {
             if (err) done(err);
             var body = res.body;
             expect(body.success).to.equal(false);
+            expect(body.type).to.equal('PASSWORD_MISMATCH_FAILURE');
             done();
         });
     });
@@ -86,6 +89,7 @@ describe('Account lifecycle', function() {
             var body = res.body;
             expect(body.success).to.equal(true);
             deleteWithEmail(body.email, function(err, res) {
+                expect(res.body.user).to.not.equal(null);
                 if (err) done(err);
                 done();
             });
