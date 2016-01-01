@@ -24,6 +24,8 @@ var User = require('./models/user.js');
 
 // Tusk Libraries
 var Validate = require('./lib/validation.js');
+var Utils = require('./lib/utils.js');
+
 
 // Configuration
 var app = express();
@@ -159,7 +161,7 @@ app.post('/user/register', function(request, response) {
                         newuser.passwordSalt = salt;
                         newuser.passwordHash = bcrypt.hashSync(password, salt);
 
-                        confirmKey = '9'+Math.floor(Math.random()*10000000);
+                        confirmKey = Utils.md5(salt + email);
 
                         newuser.confirmationKey = confirmKey;
 
