@@ -2,6 +2,7 @@ var expect = require('expect.js');
 var assert = require('assert');
 var request = require('supertest');
 var app = require('../app.js');
+
 describe('Listing lifecycle', function(){
   it('Fail to add a listing with no data', function(done){
     request(app)

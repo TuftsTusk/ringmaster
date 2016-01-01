@@ -48,6 +48,49 @@ app.use(session({
     })
 }));
 
+app.get('/user/:id/confirm', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    Unconf_User.findOne({_id: request.params.id}, function(err, user) {
+        if (err) {
+            return response.send(JSON.stringify({
+                success: false,
+                type: 'INVALID_USER_ID',
+                message: 'Invalid user id'
+            }));
+        } else {
+            if (request.query.key === user.confirmationKey) {
+                user.remove();
+
+                var newuser = new User;
+                newuser.email = user.email;
+                newuser.passwordHash = user.passwordHash;
+                newuser.passwordSalt = user.passwordSalt;
+
+                newuser.save(function (err) {
+                    if (err) {
+                        return response.send(JSON.stringify({
+                            success: false,
+                            type: 'DISK_SAVE_FAILURE',
+                            message: err
+                        }));
+                    } else {
+                        return response.send(JSON.stringify({
+                            success: true,
+                            message: 'Account email successfully verified'
+                        }));
+                    }
+                });
+            } else {
+                return response.send(JSON.stringify({
+                    success: false,
+                    type: 'INVALID_CONFIRMATION_KEY',
+                    message: 'The confirmation key provided was invalid'
+                }));
+            }
+        }
+    });
+});
+
 app.post('/user/register', function(request, response) {
     response.set('Content-Type', 'application/json');
     if (!Validate.checkForKeys(["email", "password", "confirmpass"], request.body)) {
@@ -57,7 +100,7 @@ app.post('/user/register', function(request, response) {
             message: "One or more of the registration fields was missing"
         }));
     } else {
-        var email = request.body.email;
+        var email = Validate.normalizeEmail(request.body.email);
         if (!Validate.validateTuftsEmail(email)) {
             return response.send({
                 success: false,
@@ -65,6 +108,22 @@ app.post('/user/register', function(request, response) {
                 message: 'Email must be a tufts email'
             });
         } else {
+            /*
+             *  1. Check if the email is currently in use
+             *      a. Normalize the email
+             *            i. Gmail addresses ignore dots (.) in the email name
+             *           ii. Others?
+             *      b. If the email is in use, then report as such
+             *  2. If the email is not in use, but there is an unverified entry for that email
+             *      a. If so, check the timestamp
+             *             i. If the existing entry is over 1 hour old, then delete it and
+             *                  replace it with a new entry
+             *            ii. If the existing entry is less than 1 hour old, report the email
+             *                  as recently registered (and re-send the confirmation email?)
+             *  3. If the email is not in use, nor is there an unconfirmed account for that email
+             *      a. Create an unconfirmed account for that email and send the confirmation
+             *          email. Report as such.
+             */
             User.findOne({email:email}, function(err, user) {
                 if (user) {
                     return response.send({
@@ -81,36 +140,48 @@ app.post('/user/register', function(request, response) {
                         message: "Passwords did not match"
                     });
                 } else {
-/*                    Unconf_User.findOne({email: email}, function(err, user) {
+                    Unconf_User.findOne({email: email}, function(err, user) {
                         if (user) {
+                            var now = (new Date()).getTime();
+                            if (user.when.getTime() - now > 60000) {
 
-                        } else {
+                            } else {
 
+                            }
+                            Unconf_User.remove({email: email});
                         }
-                    });
-*/
-                    var newuser = new User;
+                        var newuser = new Unconf_User;
 
-                    newuser.email = request.body.email;
+                        newuser.email = email;
 
-                    var salt = bcrypt.genSaltSync(10);
+                        var salt = bcrypt.genSaltSync(10);
 
-                    newuser.passwordSalt = salt;
-                    newuser.passwordHash = bcrypt.hashSync(password, salt);
+                        newuser.passwordSalt = salt;
+                        newuser.passwordHash = bcrypt.hashSync(password, salt);
 
-                    //TODO: Generate and send confirmation email
-                    //      also create a new model for an unconfirmed user
-                    
-                    newuser.save(function(err) {
-                        if (!err) {
-                            return response.send(JSON.stringify({success: true, email: newuser.email}));
-                        } else {
-                            return response.send(JSON.stringify({
-                                success: false,
-                                type: 'DISK_SAVE_FAILURE',
-                                message: err
-                            }));
-                        }
+                        confirmKey = '9'+Math.floor(Math.random()*10000000);
+
+                        newuser.confirmationKey = confirmKey;
+
+                        //TODO: Generate and send confirmation email
+                        //      also create a new model for an unconfirmed user
+                        
+                        newuser.save(function(err) {
+                            if (!err) {
+                                return response.send(JSON.stringify({
+                                    success: true,
+                                    email: email,
+                                    id: newuser._id,
+                                    key: confirmKey
+                                }));
+                            } else {
+                                return response.send(JSON.stringify({
+                                    success: false,
+                                    type: 'DISK_SAVE_FAILURE',
+                                    message: err
+                                }));
+                            }
+                        });
                     });
                 }
             });
@@ -118,11 +189,22 @@ app.post('/user/register', function(request, response) {
     }
 });
 
+app.delete('/unconf_user/:email', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
+        if (err || !resp) {
+            return response.send(JSON.stringify({success: false, message:err}));
+        } else {
+            return response.send(JSON.stringify({success: true, user:resp}));
+        }
+    });
+});
+
 // for debug only!!! not a real endpoint!
 app.delete('/user/:email', function(request, response) {
     response.set('Content-Type', 'application/json');
     User.find({email:request.params.email}, function(err, user) {
-        if (err) {
+        if (err || !user) {
             return reponse.send(JSON.stringify({success: false}));
         } else {
             User.findOneAndRemove({email:request.params.email}, function(err, resp) {
@@ -168,11 +250,7 @@ app.get('/alive', function(request, response){
 
 app.route('/listing')
     .post(function(request, response) {
-        
-
-
         response.set('Content-Type', 'application/json');
-        var uid = uuid.v1();
         var listing = new Listing;
         listing.user_id = 0;
         listing.address = request.body.address;

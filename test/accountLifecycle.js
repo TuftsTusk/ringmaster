@@ -58,6 +58,15 @@ describe('Account lifecycle', function() {
             .end(callback);
     };
 
+    var deleteUnconfWithEmail = function(email, callback) {
+        request(app)
+            .del('/unconf_user/'+email)
+            .send({})
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .end(callback);
+    };
+
     var registerAccount = function(email, password, confirmpass, callback) {
         request(app)
             .post('/user/register')
@@ -83,12 +92,20 @@ describe('Account lifecycle', function() {
             .end(callback);
     }
 
+    var confirmAccount = function(id, key, callback) {
+        request(app)
+            .get('/user/'+id+'/confirm')
+            .query({key:key})
+            .set('Accept', 'application/json')
+            .end(callback);
+    }
+
     it('Successfully add and remove a user account', function(done) {
         registerAccount('some.jerk@tufts.edu', 'foo', 'foo', function(err, res) {
             if (err) done(err);
             var body = res.body;
             expect(body.success).to.equal(true);
-            deleteWithEmail(body.email, function(err, res) {
+            deleteUnconfWithEmail(body.email, function(err, res) {
                 expect(res.body.user).to.not.equal(null);
                 if (err) done(err);
                 done();
@@ -104,14 +121,18 @@ describe('Account lifecycle', function() {
             if (err) done(err);
             var body = res.body;
             expect(body.success).to.equal(true);
-            logInToAccount(email, pass, function(err, res) {
+            confirmAccount(body.id, body.key, function(err, res) {
                 if (err) done(err);
-                deleteWithEmail(email, function(err, res) {
+                expect(body.success).to.equal(true);
+                logInToAccount(email, pass, function(err, res) {
                     if (err) done(err);
+                    deleteWithEmail(email, function(err, res) {
+                        if (err) done(err);
+                        expect(res.body.success).to.equal(true);
+                        done();
+                    });
                     expect(res.body.success).to.equal(true);
-                    done();
                 });
-                expect(res.body.success).to.equal(true);
             });
         });
     });

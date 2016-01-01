@@ -66,5 +66,26 @@ describe('Validation Library', function() {
         if (result) done();
         else done('Email validation failed');
     });
+
+    it('Normalize Emails', function(done) {
+        var preNormalizedEmails = [
+            'some.jerk@gmail.com',
+            'some.jerk@googlemail.com',
+            'some.jerk@tufts.edu',
+            'some.jerk@yahoo.com'
+        ];
+        var postNormalizedEmails = [
+            'somejerk@gmail.com',
+            'somejerk@googlemail.com',
+            'some.jerk@tufts.edu',
+            'some.jerk@yahoo.com'
+        ];
+        var result = true;
+        for (i=0; i<preNormalizedEmails.length; i++) {
+            result &= validate.normalizeEmail(preNormalizedEmails[i]) === postNormalizedEmails[i];
+        }
+        if (result) done();
+        else done('Email normalization failed');
+    });
 });
 
