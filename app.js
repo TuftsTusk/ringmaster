@@ -13,10 +13,6 @@ validator = require('validator'),
 bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
-// Session related plugins
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-
 // load Schema
 var Listing = require('./models/listing.js');
 var Unconf_User = require('./models/unconf_user.js');
@@ -25,7 +21,7 @@ var User = require('./models/user.js');
 // Tusk Libraries
 var Validate = require('./lib/validation.js');
 var Utils = require('./lib/utils.js');
-
+var Consts = require('./lib/consts.js');
 
 // Configuration
 var app = express();
@@ -37,14 +33,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
 app.use(cors());
 
+// Session related plugins
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+
 // Database
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
 
 app.use(session({
-    secret: 'foo',
+    secret: 'tuskislovetuskislife',
+    cookie: {
+        expires: Consts.genDefaultExpires(),
+        maxAge: Consts.getDefaultMaxAge()
+    },
     saveUninitialized: false,
     resave: true,
+    rolling: true,
+    unset: 'destroy',
     store: new MongoStore({
         mongooseConnection: mongoose.connection
     })
@@ -189,6 +195,20 @@ app.post('/user/register', function(request, response) {
             });
         }
     }
+});
+
+app.post('/user/logout', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    console.log(request.session);
+    if ('login' in request.session) {
+        delete request.session;
+        return response.send(JSON.stringify({success: true, message: 'Successfully logged out'}));
+    }
+    return response.send(JSON.stringify({
+        success: false,
+        type: 'LOGIN_SESSION_NOT_FOUND_FAILURE',
+        message: 'Unsuccessfully logged out because not logged in'
+    }));
 });
 
 app.delete('/unconf_user/:email', function(request, response) {

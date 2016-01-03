@@ -92,6 +92,16 @@ describe('Account lifecycle', function() {
             .end(callback);
     }
 
+    var logOutOfAccount = function(cookie, callback) {
+        request(app)
+            .post('/user/logout')
+            .send({})
+            .set('Accept', 'application/json')
+            .set('Cookie', cookie)
+            .expect('Content-Type', /json/)
+            .end(callback);
+    }
+
     var confirmAccount = function(id, key, callback) {
         request(app)
             .get('/user/'+id+'/confirm')
@@ -126,12 +136,17 @@ describe('Account lifecycle', function() {
                 expect(body.success).to.equal(true);
                 logInToAccount(email, pass, function(err, res) {
                     if (err) done(err);
-                    deleteWithEmail(email, function(err, res) {
-                        if (err) done(err);
-                        expect(res.body.success).to.equal(true);
-                        done();
-                    });
                     expect(res.body.success).to.equal(true);
+
+                    logOutOfAccount(res.headers['set-cookie'][0], function(err, res) {
+                        if (err) done(err);
+                        //expect(res.body.success).to.equal(true);
+                        deleteWithEmail(email, function(err, res) {
+                            if (err) done(err);
+                            expect(res.body.success).to.equal(true);
+                            done();
+                        });
+                    });
                 });
             });
         });
