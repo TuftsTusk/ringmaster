@@ -140,7 +140,7 @@ describe('Account lifecycle', function() {
 
                     logOutOfAccount(res.headers['set-cookie'][0], function(err, res) {
                         if (err) done(err);
-                        //expect(res.body.success).to.equal(true);
+                        expect(res.body.success).to.equal(true);
                         deleteWithEmail(email, function(err, res) {
                             if (err) done(err);
                             expect(res.body.success).to.equal(true);

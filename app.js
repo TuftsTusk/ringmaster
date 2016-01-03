@@ -199,7 +199,6 @@ app.post('/user/register', function(request, response) {
 
 app.post('/user/logout', function(request, response) {
     response.set('Content-Type', 'application/json');
-    console.log(request.session);
     if ('login' in request.session) {
         delete request.session;
         return response.send(JSON.stringify({success: true, message: 'Successfully logged out'}));
