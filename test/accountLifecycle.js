@@ -10,6 +10,7 @@ describe('Account lifecycle', function() {
         .send({})
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
+        .expect(400)
         .end(function(err, res) {
             if (err) done(err);
             var body = res.body;
@@ -25,6 +26,7 @@ describe('Account lifecycle', function() {
         .send({email: 'some.jerk@gmail.com', password: 'foo', confirmpass: 'foo'})
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
+        .expect(400)
         .end(function(err, res) {
             if (err) done(err);
             var body = res.body;
@@ -40,6 +42,7 @@ describe('Account lifecycle', function() {
         .send({email: 'some.jerk@tufts.edu', password: 'foo', confirmpass: 'bar'})
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
+        .expect(400)
         .end(function(err, res) {
             if (err) done(err);
             var body = res.body;
@@ -114,6 +117,7 @@ describe('Account lifecycle', function() {
         registerAccount('some.jerk@tufts.edu', 'foo', 'foo', function(err, res) {
             if (err) done(err);
             var body = res.body;
+            expect(res.statusCode).to.equal(200);
             expect(body.success).to.equal(true);
             deleteUnconfWithEmail(body.email, function(err, res) {
                 expect(res.body.user).to.not.equal(null);
@@ -122,7 +126,7 @@ describe('Account lifecycle', function() {
             });
         });
     });
-    
+
     it('Successfully add, login, and remove a user account', function(done) {
         var email = 'some.jerk@tufts.edu';
         var pass = 'foo';
@@ -130,6 +134,7 @@ describe('Account lifecycle', function() {
         registerAccount(email, pass, confirmpass, function(err, res) {
             if (err) done(err);
             var body = res.body;
+            expect(res.statusCode).to.equal(200);
             expect(body.success).to.equal(true);
             confirmAccount(body.id, body.key, function(err, res) {
                 if (err) done(err);

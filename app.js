@@ -60,7 +60,7 @@ app.get('/user/:id/confirm', function(request, response) {
     response.set('Content-Type', 'application/json');
     Unconf_User.findOne({_id: request.params.id}, function(err, user) {
         if (err) {
-            return response.send(JSON.stringify({
+            return response.status(400).send(JSON.stringify({
                 success: false,
                 type: 'INVALID_USER_ID',
                 message: 'Invalid user id'
@@ -76,20 +76,20 @@ app.get('/user/:id/confirm', function(request, response) {
 
                 newuser.save(function (err) {
                     if (err) {
-                        return response.send(JSON.stringify({
+                        return response.status(400).send(JSON.stringify({
                             success: false,
                             type: 'DISK_SAVE_FAILURE',
                             message: err
                         }));
                     } else {
-                        return response.send(JSON.stringify({
+                        return response.status(200).send(JSON.stringify({
                             success: true,
                             message: 'Account email successfully verified'
                         }));
                     }
                 });
             } else {
-                return response.send(JSON.stringify({
+                return response.status(400).send(JSON.stringify({
                     success: false,
                     type: 'INVALID_CONFIRMATION_KEY',
                     message: 'The confirmation key provided was invalid'
@@ -101,8 +101,9 @@ app.get('/user/:id/confirm', function(request, response) {
 
 app.post('/user/register', function(request, response) {
     response.set('Content-Type', 'application/json');
+    console.log(request.body);
     if (!Validate.checkForKeys(["email", "password", "confirmpass"], request.body)) {
-        return response.send(JSON.stringify({
+        return response.status(400).send(JSON.stringify({
             success: false,
             type: 'MISSING_REGISTRATION_FIELD_FAILURE',
             message: "One or more of the registration fields was missing"
@@ -110,7 +111,7 @@ app.post('/user/register', function(request, response) {
     } else {
         var email = Validate.normalizeEmail(request.body.email);
         if (!Validate.validateTuftsEmail(email)) {
-            return response.send({
+            return response.status(400).send({
                 success: false,
                 type: 'TUFTS_EMAIL_VALIDATION_FAILURE',
                 message: 'Email must be a tufts email'
@@ -134,7 +135,7 @@ app.post('/user/register', function(request, response) {
              */
             User.findOne({email:email}, function(err, user) {
                 if (user) {
-                    return response.send({
+                    return response.status(400).send({
                         success: false,
                         type: 'EMAIL_IN_USE_FAILURE',
                         message: 'Email is already in use'
@@ -142,7 +143,7 @@ app.post('/user/register', function(request, response) {
                 }
                 var password = request.body.password;
                 if (password != request.body.confirmpass) {
-                    return response.send({
+                    return response.status(400).send({
                         success: false,
                         type: 'PASSWORD_MISMATCH_FAILURE',
                         message: "Passwords did not match"
@@ -173,17 +174,17 @@ app.post('/user/register', function(request, response) {
 
                         //TODO: Generate and send confirmation email
                         //      also create a new model for an unconfirmed user
-                        
+
                         newuser.save(function(err) {
                             if (!err) {
-                                return response.send(JSON.stringify({
+                                return response.status(200).send(JSON.stringify({
                                     success: true,
                                     email: email,
                                     id: newuser._id,
                                     key: confirmKey
                                 }));
                             } else {
-                                return response.send(JSON.stringify({
+                                return response.status(400).send(JSON.stringify({
                                     success: false,
                                     type: 'DISK_SAVE_FAILURE',
                                     message: err
@@ -201,9 +202,9 @@ app.post('/user/logout', function(request, response) {
     response.set('Content-Type', 'application/json');
     if ('login' in request.session) {
         delete request.session;
-        return response.send(JSON.stringify({success: true, message: 'Successfully logged out'}));
+        return response.status(200).send(JSON.stringify({success: true, message: 'Successfully logged out'}));
     }
-    return response.send(JSON.stringify({
+    return response.status(400).send(JSON.stringify({
         success: false,
         type: 'LOGIN_SESSION_NOT_FOUND_FAILURE',
         message: 'Unsuccessfully logged out because not logged in'
@@ -214,9 +215,9 @@ app.delete('/unconf_user/:email', function(request, response) {
     response.set('Content-Type', 'application/json');
     Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
         if (err || !resp) {
-            return response.send(JSON.stringify({success: false, message:err}));
+            return response.status(400).send(JSON.stringify({success: false, message:err}));
         } else {
-            return response.send(JSON.stringify({success: true, user:resp}));
+            return response.status(200).send(JSON.stringify({success: true, user:resp}));
         }
     });
 });
@@ -226,13 +227,13 @@ app.delete('/user/:email', function(request, response) {
     response.set('Content-Type', 'application/json');
     User.find({email:request.params.email}, function(err, user) {
         if (err || !user) {
-            return reponse.send(JSON.stringify({success: false}));
+            return reponse.status(200).send(JSON.stringify({success: false}));
         } else {
             User.findOneAndRemove({email:request.params.email}, function(err, resp) {
                 if (err) {
-                    return response.send(JSON.stringify({success: false, message:err}));
+                    return response.status(400).send(JSON.stringify({success: false, message:err}));
                 } else {
-                    return response.send(JSON.stringify({success: true, user:resp}));
+                    return response.status(200).send(JSON.stringify({success: true, user:resp}));
                 }
             });
         }
@@ -246,20 +247,20 @@ app.post('/user/login', function(request, response) {
         if (diff > (3 * 60 * 1000))
             delete request.session.login;
         else if (request.session.login.tries > 5) {
-            return response.send(JSON.stringify({success: false, message: "Too many login attempts. Wait a few minutes and try again."}));
+            return response.status(400).send(JSON.stringify({success: false, message: "Too many login attempts. Wait a few minutes and try again."}));
         }
     }
     User.findOne({email:request.body.email}, function(err, user) {
         if (err) {
-            reponse.send(JSON.stringify({success: false, message: err}));
+            reponse.status(400).send(JSON.stringify({success: false, message: err}));
         } else {
             if (user && bcrypt.hashSync(request.body.password, user.passwordSalt) === user.passwordHash) {
                 request.session.login = {valid: true, when: Date.now()};
-                return response.send(JSON.stringify({success: true, message: "Logged in successfully"}));
+                return response.status(200).send(JSON.stringify({success: true, message: "Logged in successfully"}));
             } else {
                 var t = (request.session.login != undefined && "tries" in request.session.login)?(request.session.login.tries+1):1;
                 request.session.login = {valid: false, tries: t, when: Date.now()};
-                return response.send(JSON.stringify({success: false, message: "Email/password combo was incorrect"}));
+                return response.status(400).send(JSON.stringify({success: false, message: "Email/password combo was incorrect"}));
             }
         }
     });
@@ -286,9 +287,9 @@ app.route('/listing')
 
         listing.save(function(err){
             if (!err) {
-                return response.send(JSON.stringify({success: true, rsc_id: listing._id}));
+                return response.status(200).send(JSON.stringify({success: true, rsc_id: listing._id}));
             } else {
-                return response.send(JSON.stringify({success: false, message:err}));
+                return response.status(400).send(JSON.stringify({success: false, message:err}));
             }
         });
     })
