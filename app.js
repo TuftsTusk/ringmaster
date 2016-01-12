@@ -31,7 +31,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
-app.use(cors());
+var whitelist = ['http://localhost:8080'];
+var corsOptions = {
+  origin: function(origin, callback){
+    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    callback(null, originIsWhitelisted);
+  }
+};
+app.use(cors({credentials: true, origin: true}));
+
+app.options('*', cors(corsOptions));
 
 // Session related plugins
 var session = require('express-session');
@@ -200,6 +209,8 @@ app.post('/user/register', function(request, response) {
 
 app.post('/user/logout', function(request, response) {
     response.set('Content-Type', 'application/json');
+    //ensure client clears their cookies
+    response.clearCookie('connect.sid');
     if ('login' in request.session) {
         delete request.session;
         return response.status(200).send(JSON.stringify({success: true, message: 'Successfully logged out'}));
@@ -371,6 +382,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 80);
 
 module.exports = app;
