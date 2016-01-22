@@ -31,6 +31,37 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
+
+var UNDEF = -1,
+    UNKWN = -2,
+    DEV   =  0,
+    STG   =  1,
+    PROD  =  2;
+
+var ENVS = {
+    "undefined": UNDEF,
+    "unknown": UNKWN,
+    "development": DEV,
+    "staging": STG,
+    "production": PROD
+};
+var raw_ENV = process.env.NODE_ENV;
+var ENV = (raw_ENV in ENVS)?ENVS[raw_ENV]:UNKWN;
+/* Possible values:
+ *   undefined - NODE_ENV is not set. This should be treated as a FATAL error.
+ * development - Development environment, enable debug logging, etc.
+ *     staging - Staging server, perhaps allowing additional test code or authentication.
+ *  production - Live, production environment that is public-facing. No debug output!
+ */
+if (ENV < 0) {
+    if (ENV === UNDEF)
+        console.log("NODE_ENV variable not set. App will not execute until it is assigned a value.");
+    if (ENV === UNKWN)
+        console.log("NODE_ENV variable assigned to an unrecognized value.");
+    console.log("Possible values: development, staging, production");
+    process.exit(1);
+}
+
 var whitelist = ['http://localhost:8080'];
 var corsOptions = {
   origin: function(origin, callback){
@@ -49,6 +80,8 @@ var MongoStore = require('connect-mongo')(session);
 // Database
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
+
+
 
 app.use(session({
     secret: 'tuskislovetuskislife',
@@ -144,7 +177,6 @@ app.get('/user/:id/confirm', function(request, response) {
  */
 app.post('/user/register', function(request, response) {
     response.set('Content-Type', 'application/json');
-    console.log(request.body);
     if (!Validate.checkForKeys(["email", "password", "confirmpass"], request.body)) {
         return response.status(400).send(JSON.stringify({
             success: false,
