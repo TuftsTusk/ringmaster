@@ -1,4 +1,6 @@
 language: node_js
 node_js:
  - "4.0.0"
+env:
+ - NODE_ENV=development
 services: mongodb
