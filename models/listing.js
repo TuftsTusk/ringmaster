@@ -1,17 +1,43 @@
-mongoose = require('mongoose');
+var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var ListingSchema = new Schema({
+var options = {
+    timestamps: true,
+    discriminatorKey: 'kind'
+};
+
+var listingSchema = new Schema({
     user_id: { type: String, required: true },
-    address: { type: String, required: true },
-    date_range: { type: String, required: true },
-    rent: { type: Number, required: true },
-    bedrooms_available: { type: Number, required: false, default: 1 },
-    bathrooms: { type: Number, required: true },
-    image_gallery_link: { type: String, required: false },
-    est_utilities: { type: Number, required: false },
-    pre_furnished: { type: Boolean, required: false },
-    notes: { type: String, required: false },
-    last_modified: { type: Date, default: Date.now }
-});
-module.exports = mongoose.model('Listing', ListingSchema);
+    approval: {
+        approved: { type: Boolean, default: false },
+        approved_by: { type: String }
+    }
+}, options);
+
+var Listing = mongoose.model('Listing', listingSchema);
+
+var miscSchema = new Schema({
+    title: { type: String, required: true },
+    body: { type: String, required: true }
+}, options);
+
+var MISC = 'MiscListing';
+var MiscListing = Listing.discriminator(MISC, miscSchema);
+
+var bookSchema = new Schema({
+    title: { type: String, required: true },
+    authors: [{ type: String, required: true }],
+    edition: { type: String, required: true }
+}, options);
+
+var BOOK = 'BookListing';
+var BookListing = Listing.discriminator(BOOK, bookSchema);
+
+module.exports = {
+    Listing: Listing,
+    MiscListing: MiscListing,
+    MISC: MISC,
+    BookListing: BookListing,
+    BOOK: BOOK
+};
+
