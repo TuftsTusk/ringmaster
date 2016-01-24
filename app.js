@@ -14,7 +14,8 @@ bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
 // load Schema
-var Listing = require('./models/listing.js');
+//var Listing = require('./models/listing.js');
+var Listings = require('./models/new_listing.js');
 var Unconf_User = require('./models/unconf_user.js');
 var User = require('./models/user.js');
 
@@ -60,6 +61,12 @@ if (ENV < 0) {
         console.log("NODE_ENV variable assigned to an unrecognized value.");
     console.log("Possible values: development, staging, production");
     process.exit(1);
+}
+
+function log(obj) {
+    if (ENV === DEV || ENV === STG) {
+        console.log(obj);
+    }
 }
 
 var whitelist = ['http://localhost:8080', 'https://tuskdumbo.herokuapp.com', 'http://tuskmarketplace.com', 'https://tuskmarketplace.com', 'https://tuskdumbostaging.herokuapp.com'];
@@ -232,7 +239,7 @@ app.post('/user/register', function(request, response) {
                             } else {
 
                             }
-                            Unconf_User.remove({email: email});
+                            user.remove();
                         }
                         var newuser = new Unconf_User;
 
@@ -305,6 +312,12 @@ app.post('/user/logout', function(request, response) {
 // TODO: remove these and make a secure access method to perform deletion
 app.delete('/unconf_user/:email', function(request, response) {
     response.set('Content-Type', 'application/json');
+    if (ENV !== DEV) {
+        return response.status(400).send(JSON.stringify({
+            success: false
+        }));
+    }
+
     Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
         if (err || !resp) {
             return response.status(400).send(JSON.stringify({success: false, message:err}));
@@ -318,6 +331,12 @@ app.delete('/unconf_user/:email', function(request, response) {
 // TODO: remove these and make a secure access method to perform deletion
 app.delete('/user/:email', function(request, response) {
     response.set('Content-Type', 'application/json');
+    if (ENV !== DEV) {
+        return response.status(400).send(JSON.stringify({
+            success: false
+        }));
+    }
+
     User.find({email:request.params.email}, function(err, user) {
         if (err || !user) {
             return reponse.status(200).send(JSON.stringify({success: false}));
@@ -361,7 +380,14 @@ app.post('/user/login', function(request, response) {
             reponse.status(400).send(JSON.stringify({success: false, message: err}));
         } else {
             if (user && bcrypt.hashSync(request.body.password, user.passwordSalt) === user.passwordHash) {
-                request.session.login = {valid: true, when: Date.now()};
+                request.session.login = {
+                    valid: true,
+                    when: Date.now(),
+                    who: {
+                        id: user._id,
+                        email: user.email
+                    }
+                };
                 return response.status(200).send(JSON.stringify({success: true, message: "Logged in successfully"}));
             } else {
                 var t = (request.session.login != undefined && "tries" in request.session.login)?(request.session.login.tries+1):1;
@@ -376,9 +402,61 @@ app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
 
+function ensureLoginSession(request) {
+    if (request.session.login &&
+        request.session.login.valid &&
+        request.session.login.who.id) {
+        return true;
+    }
+    return false;
+}
+
+function makeNewListingFromPost(body, user_id) {
+    if (body.type) {
+        if (body.type === Listings.MISC) {
+            var miscListing = new Listings.MiscListing;
+            miscListing.title = body.title;
+            miscListing.body = body.body;
+            miscListing.user_id = user_id;
+            return {
+                type: Listings.MISC,
+                listing: miscListing
+            };
+        }
+    }
+    return false;
+}
+
 app.route('/listing')
     .post(function(request, response) {
         response.set('Content-Type', 'application/json');
+
+        if (!ensureLoginSession(request)) {
+            return response.status(400).send(JSON.stringify({
+                success: false,
+                type: 'NOT_LOGGED_IN_EXCEPTION',
+                message: 'Listing could not be posted because the user is not logged in'
+            }));
+        }
+        
+        var newListing = makeNewListingFromPost(request.body, request.session.login.who.id);
+        if (!newListing) {
+            return response.status(400).send(JSON.stringify({
+                success: false,
+                type: 'LISTING_INVALID_DATA_EXCEPTION',
+                message: 'Listing data did not contain all requisite fields'
+            }));
+        } else {
+            newListing.listing.save(function (err) {
+                if (!err) {
+                    return response.status(200).send(JSON.stringify({success: true, rsc_id: newListing.listing._id}));
+                } else {
+                    return response.status(400).send(JSON.stringify({success: false, message:err}));
+                }
+            });
+        }
+
+        /*
         var listing = new Listing;
         listing.user_id = 0;
         listing.address = request.body.address;
@@ -398,10 +476,11 @@ app.route('/listing')
                 return response.status(400).send(JSON.stringify({success: false, message:err}));
             }
         });
+        */
     })
     .get(function(request,response){
       response.set('Content-Type', 'application/json');
-         return Listing.find(function (err, listings) {
+         return Listings.Listing.find(function (err, listings) {
             if (!err){
               return response.send(listings.reverse());
             } else {
@@ -413,7 +492,7 @@ app.route('/listing')
 app.get('/search/:vars/:val', function(request,response){
   response.set('Content-Type', 'application/json');
 	var val = request.params.val;
-	return Listing.find({_id:val}, function (err, listing) {
+	return Listings.Listing.find({_id:val}, function (err, listing) {
 	    if (!err){
 	      response.send(listing);
 	    } else {
@@ -425,7 +504,7 @@ app.get('/search/:vars/:val', function(request,response){
 app.get('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');
 	var uid = request.params.uid;
-	return Listing.find({_id:uid}, function (err, listing) {
+	return Listing.Listing.find({_id:uid}, function (err, listing) {
 	    if (!err){
 	      response.send(listing);
 	    } else {
@@ -435,13 +514,26 @@ app.get('/listing/:uid', function(request,response){
 });
 
 app.delete('/listing/:uid', function(request,response){
-  response.set('Content-Type', 'application/json');
+    response.set('Content-Type', 'application/json');
+    if (ENV !== DEV) {
+        return response.status(400).send(JSON.stringify({
+            success: false
+        }));
+    }
+
 	var uid = request.params.uid;
-	return Listing.findOneAndRemove({_id:uid}).remove(function (err, listing) {
-	    if (!err){
-	      response.send(listing);
+	return Listings.Listing.findOne({_id:uid}, function (err, listing) {
+	    if (!err) {
+            listing.remove();
+            response.status(200).send({
+                success: true,
+                listing: listing
+            });
 	    } else {
-	      response.send(err);
+	        response.status(400).send(JSON.stringify({
+                message: err,
+                success: false
+            }));
 	    }
 	});
 });
@@ -455,6 +547,7 @@ app.use(function(req, res, next) {
 
 // error handlers
 
+/* TODO: check up on this
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
@@ -467,6 +560,7 @@ if (app.get('env') === 'development') {
   });
 }
 
+
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
@@ -476,6 +570,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+*/
 
 app.listen(process.env.PORT || 80);
 

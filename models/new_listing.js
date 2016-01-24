@@ -3,12 +3,15 @@ var Schema = mongoose.Schema;
 
 var options = {
     timestamps: true,
-    discriminatorKey: 'listing'
+    discriminatorKey: 'kind'
 };
 
 var listingSchema = new Schema({
     user_id: { type: String, required: true },
-    approved: { type: Boolean, required: false },
+    approval: {
+        approved: { type: Boolean, default: false },
+        approved_by: { type: String }
+    }
 }, options);
 
 var Listing = mongoose.model('Listing', listingSchema);
@@ -16,13 +19,25 @@ var Listing = mongoose.model('Listing', listingSchema);
 var miscSchema = new Schema({
     title: { type: String, required: true },
     body: { type: String, required: true }
-});
+}, options);
 
+var MISC = 'MiscListing';
+var MiscListing = Listing.discriminator(MISC, miscSchema);
 
-var MiscListing = Listing.discriminator('MiscListing', miscSchema, options);
+var bookSchema = new Schema({
+    title: { type: String, required: true },
+    authors: [{ type: String, required: true }],
+    edition: { type: String, required: true }
+}, options);
+
+var BOOK = 'BookListing';
+var BookListing = Listing.discriminator(BOOK, bookSchema);
 
 module.exports = {
     Listing: Listing,
-    MiscListing: MiscListing
+    MiscListing: MiscListing,
+    MISC: MISC,
+    BookListing: BookListing,
+    BOOK: BOOK
 };
 
