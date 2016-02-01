@@ -23,7 +23,6 @@ describe('Listing lifecycle', function(){
       .expect('Content-Type', /json/)
       .end(function(err, res) {
         if (err) done(err);
-        //var body = JSON.parse(res.text);
         var body = res.body;
         expect(body.success).to.equal(false);
         done();

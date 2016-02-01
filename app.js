@@ -469,28 +469,6 @@ app.route('/listing')
                 }
             });
         }
-
-        /*
-        var listing = new Listing;
-        listing.user_id = 0;
-        listing.address = request.body.address;
-        listing.date_range = request.body.date_range;
-        listing.rent = request.body.rent;
-        listing.bedrooms_available = request.body.bedrooms;
-        listing.bathrooms = request.body.bathrooms;
-        listing.image_gallery_link = ('image_gallery_link' in request.body) ? request.body.image_gallery_link : "";
-        listing.est_utilities = ('est_utilities' in request.body) ? request.body.est_utilities : "";
-        listing.notes = ('notes' in request.body) ? request.body.notes : "";
-
-
-        listing.save(function(err){
-            if (!err) {
-                return response.status(200).send(JSON.stringify({success: true, rsc_id: listing._id}));
-            } else {
-                return response.status(400).send(JSON.stringify({success: false, message:err}));
-            }
-        });
-        */
     })
     .get(function(request,response){
       response.set('Content-Type', 'application/json');
