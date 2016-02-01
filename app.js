@@ -562,7 +562,7 @@ app.use(function(req, res, next) {
 
 // error handlers
 
-/* TODO: check up on this
+// TODO: check up on this
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
@@ -585,7 +585,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-*/
+
 
 app.listen(process.env.PORT || 80);
 

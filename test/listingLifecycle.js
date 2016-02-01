@@ -3,7 +3,10 @@ var assert = require('assert');
 var request = require('supertest');
 var app = require('../app.js');
 var account = require('./macros/account.js');
+<<<<<<< HEAD
 var database = require('./macros/database.js');
+=======
+>>>>>>> 4134880e23bd8206fcf93100082df5dfe573a1ba
 
 describe('Listing lifecycle', function(){
     afterEach('Verifying that all databases are empty...', function() {
@@ -63,6 +66,8 @@ describe('Listing lifecycle', function(){
         expect(res.statusCode).to.equal(200);
         expect(body.success).to.equal(true);
         account.confirmAccount(body.id, body.key, function(err, res) {
+<<<<<<< HEAD
+=======
             if (err) done(err);
             expect(body.success).to.equal(true);
             account.logInToAccount(email, pass, function(err, res) {
@@ -94,5 +99,59 @@ describe('Listing lifecycle', function(){
             });
         });
     });
+
+    /*request(app)
+        .post('/listing')
+        .send({
+            address: "587 Boston Ave., Somerville MA 02144",
+            date_range: "2015-08-02,2016-08-02",
+            rent: 750,
+            bedrooms_available: 5,
+            bathrooms: 3,
+            image_gallery_link: "img link hurrdurr",
+            est_utilities: 100,
+            pre_furnished: true,
+            notes: "Some notes here!"
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .end(function(err, res) {
+>>>>>>> 4134880e23bd8206fcf93100082df5dfe573a1ba
+            if (err) done(err);
+            expect(body.success).to.equal(true);
+<<<<<<< HEAD
+            account.logInToAccount(email, pass, function(err, res) {
+                if (err) done(err);
+                expect(res.body.success).to.equal(true);
+                
+                var cookie = res.headers['set-cookie'][0];
+
+                makeMiscPost(cookie, function(err, res) {
+                    if (err) done(err);
+                    expect(res.body.success).to.equal(true);
+
+                    deletePostFromId(res.body.rsc_id, function(err, res) {
+                        if (err) done(err);
+                        expect(res.body.success).to.equal(true);
+
+                        account.logOutOfAccount(cookie, function(err, res) {
+                            if (err) done(err);
+                            expect(res.body.success).to.equal(true);
+
+                            account.deleteWithEmail(email, function(err, res) {
+                                if (err) done(err);
+                                expect(res.body.success).to.equal(true);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+=======
+            deleteWithID(body.rsc_id);
+        });*/
+>>>>>>> 4134880e23bd8206fcf93100082df5dfe573a1ba
   });
 });
