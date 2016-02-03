@@ -70,9 +70,9 @@ describe('Validation Library', function() {
     it('Normalize Emails', function(done) {
         var preNormalizedEmails = [
             'some.jerk@gmail.com',
-            'some.jerk@googlemail.com',
+            'SOME.JERK@googlemail.com',
             'some.jerk@tufts.edu',
-            'some.jerk@yahoo.com'
+            'some.jerk@Yahoo.com'
         ];
         var postNormalizedEmails = [
             'somejerk@gmail.com',

@@ -6,6 +6,6 @@ var UnconfUserSchema = new Schema({
     passwordHash: String,
     passwordSalt: String,
     confirmationKey: String,
-    when: { type: Date, default: Date.now() }
+    when: { type: Date, default: Date.now }
 });
 module.exports = mongoose.model('Unconf_User', UnconfUserSchema);

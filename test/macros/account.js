@@ -7,8 +7,6 @@ exports.deleteWithEmail = function(email, callback) {
     request(app)
         .del('/user/'+email)
         .send({})
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
         .end(callback);
 };
 
@@ -16,8 +14,6 @@ exports.deleteUnconfWithEmail = function(email, callback) {
     request(app)
         .del('/unconf_user/'+email)
         .send({})
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
         .end(callback);
 };
 
@@ -30,7 +26,6 @@ exports.registerAccount = function(email, password, confirmpass, callback) {
             confirmpass: confirmpass
         })
         .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
         .end(callback);
 }
 
@@ -42,7 +37,6 @@ exports.logInToAccount = function(email, password, callback) {
             password: password
         })
         .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
         .end(callback);
 }
 
@@ -52,7 +46,6 @@ exports.logOutOfAccount = function(cookie, callback) {
         .send({})
         .set('Accept', 'application/json')
         .set('Cookie', cookie)
-        .expect('Content-Type', /json/)
         .end(callback);
 }
 
@@ -60,8 +53,14 @@ exports.confirmAccount = function(id, key, callback) {
     request(app)
         .get('/user/'+id+'/confirm')
         .query({key:key})
-        .set('Accept', 'application/json')
+        .set('accept', 'application/json')
         .end(callback);
 }
 
-
+exports.recoverPassword = function(email, callback) {
+    request(app)
+        .get('/user/recover')
+        .query({email:email})
+        .set('accept', 'application/json')
+        .end(callback);
+}

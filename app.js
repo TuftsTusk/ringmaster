@@ -84,10 +84,8 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 
 // Database
-var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL|| 'mongodb://localhost/tusk';
+var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/tusk';
 mongoose.connect(mongoUri);
-
-
 
 app.use(session({
     secret: 'tuskislovetuskislife',
@@ -113,7 +111,7 @@ if (ENV === DEV || ENV === STG)
                     users: users
                 }));
             } else
-                return response.status(400).send(JSON.stringify({}));
+                return sendEnvConfigFailure(response);
         });
     });
 
@@ -136,14 +134,12 @@ if (ENV === DEV || ENV === STG)
  *                                         that on file for that user
  */
 app.get('/user/:id/confirm', function(request, response) {
-    response.set('Content-Type', 'application/json');
     Unconf_User.findOne({_id: request.params.id}, function(err, user) {
         if (err) {
-            return response.status(400).send(JSON.stringify({
-                success: false,
-                type: 'INVALID_USER_ID',
-                message: 'Invalid user id'
-            }));
+            return response.status(400).send(error(
+                'INVALID_USER_ID',
+                'Invalid user id'
+            ));
         } else {
             if (request.query.key === user.confirmationKey) {
                 user.remove();
@@ -155,24 +151,19 @@ app.get('/user/:id/confirm', function(request, response) {
 
                 newuser.save(function (err) {
                     if (err) {
-                        return response.status(400).send(JSON.stringify({
-                            success: false,
-                            type: 'DISK_SAVE_FAILURE',
-                            message: err
-                        }));
+                        return response.status(500).send(error(
+                            'DISK_SAVE_FAILURE',
+                            err
+                        ));
                     } else {
-                        return response.status(200).send(JSON.stringify({
-                            success: true,
-                            message: 'Account email successfully verified'
-                        }));
+                        return response.sendStatus(204);
                     }
                 });
             } else {
-                return response.status(400).send(JSON.stringify({
-                    success: false,
-                    type: 'INVALID_CONFIRMATION_KEY',
-                    message: 'The confirmation key provided was invalid'
-                }));
+                return response.status(400).send(error(
+                    'INVALID_CONFIRMATION_KEY',
+                    'The confirmation key provided was invalid'
+                ));
             }
         }
     });
@@ -199,19 +190,17 @@ app.get('/user/:id/confirm', function(request, response) {
 app.post('/user/register', function(request, response) {
     response.set('Content-Type', 'application/json');
     if (!Validate.checkForKeys(["email", "password", "confirmpass"], request.body)) {
-        return response.status(400).send(JSON.stringify({
-            success: false,
-            type: 'MISSING_REGISTRATION_FIELD_FAILURE',
-            message: "One or more of the registration fields was missing"
-        }));
+        return response.status(400).send(error(
+            'MISSING_REGISTRATION_FIELD_FAILURE',
+            "One or more of the registration fields was missing"
+        ));
     } else {
         var email = Validate.normalizeEmail(request.body.email);
         if (!Validate.validateTuftsEmail(email)) {
-            return response.status(400).send({
-                success: false,
-                type: 'TUFTS_EMAIL_VALIDATION_FAILURE',
-                message: 'Email must be a tufts email'
-            });
+            return response.status(400).send(error(
+                'TUFTS_EMAIL_VALIDATION_FAILURE',
+                'Email must be a tufts email'
+            ));
         } else {
             /*
              *  1. Check if the email is currently in use
@@ -231,25 +220,23 @@ app.post('/user/register', function(request, response) {
              */
             User.findOne({email:email}, function(err, user) {
                 if (user) {
-                    return response.status(400).send({
-                        success: false,
-                        type: 'EMAIL_IN_USE_FAILURE',
-                        message: 'Email is already in use'
-                    });
+                    return response.status(400).send(error(
+                        'EMAIL_IN_USE_FAILURE',
+                        'Email is already in use'
+                    ));
                 }
                 var password = request.body.password;
                 if (password != request.body.confirmpass) {
-                    return response.status(400).send({
-                        success: false,
-                        type: 'PASSWORD_MISMATCH_FAILURE',
-                        message: "Passwords did not match"
-                    });
+                    return response.status(400).send(error(
+                        'PASSWORD_MISMATCH_FAILURE',
+                        'Passwords did not match'
+                    ));
                 } else {
                     Unconf_User.findOne({email: email}, function(err, user) {
                         if (user) {
                             var now = (new Date()).getTime();
                             if (user.when.getTime() - now > 60000) {
-
+                                //TODO: This logic if the unconfirmed user is still hangin around
                             } else {
 
                             }
@@ -268,23 +255,22 @@ app.post('/user/register', function(request, response) {
 
                         newuser.confirmationKey = confirmKey;
 
-                        //TODO: Generate and send confirmation email
-                        //      also create a new model for an unconfirmed user
-
                         newuser.save(function(err) {
                             if (!err) {
-                                return response.status(200).send(JSON.stringify({
-                                    success: true,
-                                    email: email,
-                                    id: newuser._id,
-                                    key: confirmKey
-                                }));
+                                if (ENV === DEV || ENV === STG) {
+                                    return response.status(200).send(JSON.stringify({
+                                        email: email,
+                                        id: newuser._id,
+                                        key: confirmKey
+                                    }));
+                                } else {
+                                    //TODO: Generate and send confirmation email
+                                }
                             } else {
-                                return response.status(400).send(JSON.stringify({
-                                    success: false,
-                                    type: 'DISK_SAVE_FAILURE',
-                                    message: err
-                                }));
+                                return response.status(400).send(error(
+                                    'DISK_SAVE_FAILURE',
+                                    err
+                                ));
                             }
                         });
                     });
@@ -308,63 +294,46 @@ app.post('/user/register', function(request, response) {
  *                                                an invalid session cookie
  */
 app.post('/user/logout', function(request, response) {
-    response.set('Content-Type', 'application/json');
     //ensure client clears their cookies
     response.clearCookie('connect.sid');
     if ('login' in request.session) {
         delete request.session;
-        return response.status(200).send(JSON.stringify({success: true, message: 'Successfully logged out'}));
+        return response.sendStatus(204);
     }
-    return response.status(400).send(JSON.stringify({
-        success: false,
-        type: 'LOGIN_SESSION_NOT_FOUND_FAILURE',
-        message: 'Unsuccessfully logged out because not logged in'
-    }));
+    return response.status(400).send(error(
+        'LOGIN_SESSION_NOT_FOUND_FAILURE',
+        'Unsuccessfully logged out because not logged in'
+    ));
 });
 
-if (ENV === DEV || ENV === STG)
+if (ENV === DEV || ENV === STG) {
     app.delete('/unconf_user/:email', function(request, response) {
-        response.set('Content-Type', 'application/json');
-        if (ENV !== DEV) {
-            return response.status(400).send(JSON.stringify({
-                success: false
-            }));
-        }
-
         Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
             if (err || !resp) {
-                return response.status(400).send(JSON.stringify({success: false, message:err}));
+                return response.status(500).send(error('UNCONF_USER_DELETION_FAILURE', 'An unconfirmed user account failed to be deleted'));
             } else {
-                return response.status(200).send(JSON.stringify({success: true, user:resp}));
+                return response.sendStatus(204);
             }
         });
     });
 
-// for debug only!!! not a real endpoint!
-// TODO: remove these and make a secure access method to perform deletion
-if (ENV === DEV || ENV === STG)
     app.delete('/user/:email', function(request, response) {
-        response.set('Content-Type', 'application/json');
-        if (ENV !== DEV) {
-            return response.status(400).send(JSON.stringify({
-                success: false
-            }));
-        }
-
-        User.find({email:request.params.email}, function(err, user) {
+        User.findOneAndRemove({email:request.params.email}, function(err, user) {
             if (err || !user) {
-                return reponse.status(200).send(JSON.stringify({success: false}));
+                return reponse.status(404).send();
             } else {
-                User.findOneAndRemove({email:request.params.email}, function(err, resp) {
-                    if (err) {
-                        return response.status(400).send(JSON.stringify({success: false, message:err}));
-                    } else {
-                        return response.status(200).send(JSON.stringify({success: true, user:resp}));
-                    }
-                });
+                return response.sendStatus(204);
             }
         });
     });
+
+    app.delete('/all', function(request, response) {
+        User.remove({});
+        Unconf_User.remove({});
+        Listing.remove({});
+        response.sendStatus(204)
+    });
+}
 
 /*
  *   Method | POST
@@ -380,41 +349,106 @@ if (ENV === DEV || ENV === STG)
  *                                                an invalid session cookie
  */
 app.post('/user/login', function(request, response) {
-    response.set('Content-Type', 'application/json');
     if ("login" in request.session && "tries" in request.session.login) {
         var diff = Date.now() - request.session.login.when;
         if (diff > (3 * 60 * 1000))
             delete request.session.login;
         else if (request.session.login.tries > 5) {
-            return response.status(400).send(JSON.stringify({success: false, message: "Too many login attempts. Wait a few minutes and try again."}));
+            return response.status(429).send(error(
+                'EXCESS_LOGIN_ATTEMPTS_FAILURE',
+                'Too many login attempts—wait a few minutes and try again.'
+            ));
         }
     }
     User.findOne({email:request.body.email}, function(err, user) {
         if (err) {
-            reponse.status(400).send(JSON.stringify({success: false, message: err}));
+            reponse.status(400).send(JSON.stringify({message: err}));
+        } else if (!user) {
+            response.status(404).send(error('USER_NOT_FOUND_FAILURE', 'The user with that email was not found'));
+        } else if (bcrypt.hashSync(request.body.password, user.passwordSalt) === user.passwordHash) {
+            request.session.login = {
+                valid: true,
+                when: Date.now(),
+                who: {
+                    id: user._id,
+                    email: user.email
+                }
+            };
+            return response.status(204).send();
         } else {
-            if (user && bcrypt.hashSync(request.body.password, user.passwordSalt) === user.passwordHash) {
-                request.session.login = {
-                    valid: true,
-                    when: Date.now(),
-                    who: {
-                        id: user._id,
-                        email: user.email
-                    }
-                };
-                return response.status(200).send(JSON.stringify({success: true, message: "Logged in successfully"}));
-            } else {
-                var t = (request.session.login != undefined && "tries" in request.session.login)?(request.session.login.tries+1):1;
-                request.session.login = {valid: false, tries: t, when: Date.now()};
-                return response.status(400).send(JSON.stringify({success: false, message: "Email/password combo was incorrect"}));
-            }
+            var t = (request.session.login != undefined && "tries" in request.session.login)?(request.session.login.tries+1):1;
+            request.session.login = {valid: false, tries: t, when: Date.now()};
+            return response.status(400).send(JSON.stringify({message: "Email/password combo was incorrect"}));
         }
+    });
+});
+
+app.put('/user/password', function(request, response) {
+    if (!request.session.login || !request.session.login.valid) {
+        return response.status(400).send(error('NOT_LOGGED_IN_FAILURE', 'User not logged in'));
+    } else {
+        User.findOne({_id: request.session.login.who.id}, function(err, user) {
+            if (err) {
+
+            } else if (!user) {
+
+            } else {
+
+            }
+        });
+    }
+});
+
+app.post('/user/:email/recover', function(request, response) {
+    response.set('Content-Type', 'application/json');
+    var email = request.params.email;
+    User.findOne({email:validator.normalizeEmail(email)}, function(err, user) {
+        if (err || !user) {
+            return response.status(501).send(error(
+                'ACCOUNT_RECOVERY_FAILURE',
+                'The account password could not be recovered'
+            ));
+        }
+        key = Utils.md5((Date.now() % 23623) + user.password);
+        user.recovery.requested = true;
+        user.recovery.key = key;
+        user.recovery.when = Date.now();
+        
+        if (ENV === PROD) {
+            //TODO: Generate email and blast it off
+            return sendNotYetImplementedFailure(response);
+        } else if (ENV === DEV || ENV === STG) {
+            return response.status(200).send(JSON.stringify({
+                id: user._id,
+                confirm_key: key
+            }));
+        } else {
+            return sendEnvConfigFailure(response);
+        }   
     });
 });
 
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
 });
+
+function error(type, message) {
+    return JSON.stringify({
+        type: type,
+        message: message
+    });
+}
+
+function sendEnvConfigFailure(response) {
+    return response.status(500).send(error(
+        'ENVIRONMENT_MISCONFIGURATION_FAILURE',
+        'The local environment was configured incorrectly'
+    ));
+}
+
+function sendNotYetImplementedFailure(response) {
+    return response.status(501).send(error('NOT_YET_IMPLEMENTED_FAILURE', 'Not yet implemented'));
+}
 
 function ensureLoginSession(request) {
     if (request.session.login &&
@@ -446,26 +480,27 @@ app.route('/listing')
         response.set('Content-Type', 'application/json');
 
         if (!ensureLoginSession(request)) {
-            return response.status(400).send(JSON.stringify({
-                success: false,
-                type: 'NOT_LOGGED_IN_EXCEPTION',
-                message: 'Listing could not be posted because the user is not logged in'
-            }));
+            return response.status(400).send(error(
+                'NOT_LOGGED_IN_EXCEPTION',
+                'Listing could not be posted because the user is not logged in'
+            ));
         }
         
         var newListing = makeNewListingFromPost(request.body, request.session.login.who.id);
         if (!newListing) {
             return response.status(400).send(JSON.stringify({
-                success: false,
                 type: 'LISTING_INVALID_DATA_EXCEPTION',
                 message: 'Listing data did not contain all requisite fields'
             }));
         } else {
             newListing.listing.save(function (err) {
                 if (!err) {
-                    return response.status(200).send(JSON.stringify({success: true, rsc_id: newListing.listing._id}));
+                    return response
+                            .status(201)
+                            .set('Location', '/listing/'+newListing.listing._id)
+                            .send({rsc_id: newListing.listing._id});
                 } else {
-                    return response.status(400).send(JSON.stringify({success: false, message:err}));
+                    return response.status(500).send(error('DISK_SAVE_FAILURE', err));
                 }
             });
         }
@@ -474,9 +509,9 @@ app.route('/listing')
       response.set('Content-Type', 'application/json');
          return Listings.Listing.find(function (err, listings) {
             if (!err){
-              return response.send(listings.reverse());
+              return response.status(200).send(listings.reverse());
             } else {
-              return response.send('{}');
+              return response.status(404).send('{}');
             }
         });
     });
@@ -486,9 +521,11 @@ app.get('/search/:vars/:val', function(request,response){
 	var val = request.params.val;
 	return Listings.Listing.find({_id:val}, function (err, listing) {
 	    if (!err){
-	      response.send(listing);
+	        response.status(200).send(JSON.stringify({
+                listing: listing
+            }));
 	    } else {
-	      response.send('{}');
+	      response.status(404).send('{}');
 	    }
 	});
 });
@@ -498,38 +535,35 @@ app.get('/listing/:uid', function(request,response){
 	var uid = request.params.uid;
 	return Listing.Listing.find({_id:uid}, function (err, listing) {
 	    if (!err){
-	      response.send(listing);
+	        response.status(200).send(JSON.stringify({
+                listing: listing
+            }));
 	    } else {
-	      response.send('{}');
+            response.status(404).send('{}');
 	    }
 	});
 });
 
-if (ENV === DEV || ENV === STG)
+if (ENV === DEV || ENV === STG) {
     app.delete('/listing/:uid', function(request,response){
-        response.set('Content-Type', 'application/json');
-        if (ENV !== DEV) {
-            return response.status(400).send(JSON.stringify({
-                success: false
-            }));
-        }
-
         var uid = request.params.uid;
-        return Listings.Listing.findOne({_id:uid}, function (err, listing) {
-            if (!err) {
-                listing.remove();
-                response.status(200).send({
-                    success: true,
-                    listing: listing
-                });
+        return Listings.Listing.findOneAndRemove({_id:uid}, function (err, listing) {
+            if (!err && listing) {
+                response.sendStatus(204);
             } else {
-                response.status(400).send(JSON.stringify({
-                    message: err,
-                    success: false
-                }));
+                return response.status(500).send(error(
+                    'UNKNOWN_SERVER_FAILURE',
+                    err
+                ));
             }
         });
     });
+}
+
+function purgeSession(response) {
+    response.clearCookie('connect.sid');
+
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
