@@ -35,7 +35,8 @@ app.set('view engine', 'jade');
 
 // Tusk Routes
 var UserRoutes = require('./route/user.js');
-
+var ListingRoutes = require('./route/listing.js');
+var TestingRoutes = require('./route/testing.js');
 
 var ENV = Consts.ENV;
 var UNDEF = Consts.UNDEF;
@@ -98,6 +99,8 @@ app.use(session({
     })
 }));
 
+app.use(TestingRoutes.ensureEnv);
+
 if (ENV === DEV || ENV === STG)
     app.get('/users', function(request, response) {
         response.set('Content-Type', 'application/json');
@@ -129,9 +132,7 @@ if (ENV === DEV || ENV === STG)
  *          | INVALID_CONFIRMATION_KEY - The provided confirmation key did not match
  *                                         that on file for that user
  */
-app.get('/user/:id/confirm', function(request, response) {
-    return UserRoutes.getUserConfirmById(request, response);
-});
+app.get('/user/:id/confirm', UserRoutes.getUserConfirmById);
 
 /*
  *   Method | POST
@@ -151,9 +152,7 @@ app.get('/user/:id/confirm', function(request, response) {
  *          | PASSWORD_MISMATCH_FAILURE - The password and confirmpass fields did not match
  *          | DISK_SAVE_FAILURE - The user account failed to save to disk
  */
-app.post('/me/register', function(request, response) {
-    return UserRoutes.postMeRegister(request, response);
-});
+app.post('/me/register', UserRoutes.postMeRegister);
 
 /*
  *   Method | POST
@@ -168,9 +167,7 @@ app.post('/me/register', function(request, response) {
  *   Errors | LOGIN_SESSION_NOT_FOUND_FAILURE - The user was either not logged in or they had
  *                                                an invalid session cookie
  */
-app.post('/me/logout', function(request, response) {
-    return UserRoutes.postMeLogout(request, response);
-});
+app.post('/me/logout', UserRoutes.postMeLogout);
 
 if (ENV === DEV || ENV === STG) {
     app.delete('/unconf_user/:email', function(request, response) {
@@ -214,18 +211,11 @@ if (ENV === DEV || ENV === STG) {
  *   Errors | LOGIN_SESSION_NOT_FOUND_FAILURE - The user was either not logged in or they had
  *                                                an invalid session cookie
  */
-app.post('/me/login', function(request, response) {
-    return UserRoutes.postMeLogin(request, response);
-});
+app.post('/me/login', UserRoutes.postMeLogin);
 
-app.put('/me/password', function(request, response) {
-    request.params.targetid = request.session.login.who.id;
-    return UserRoutes.putUserPasswordById(request, response);
-});
+app.put('/me/password', UserRoutes.putMyPassword);
 
-app.post('/user/:email/recover', function(request, response) {
-    return UserRoutes.postUserRecoverByEmail(request, response);
-});
+app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
 
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
@@ -258,76 +248,9 @@ function ensureLoginSession(request) {
     return false;
 }
 
-function makeNewListingFromPost(body, user_id) {
-    if (body.type) {
-        if (body.type === Listings.MISC) {
-            var miscListing = new Listings.MiscListing;
-            miscListing.title = body.title;
-            miscListing.body = body.body;
-            miscListing.user_id = user_id;
-            return {
-                type: Listings.MISC,
-                listing: miscListing
-            };
-        }
-    }
-    return false;
-}
-
 app.route('/listing')
-    .post(function(request, response) {
-        response.set('Content-Type', 'application/json');
-
-        if (!ensureLoginSession(request)) {
-            return response.status(400).send(error(
-                'NOT_LOGGED_IN_EXCEPTION',
-                'Listing could not be posted because the user is not logged in'
-            ));
-        }
-        
-        var newListing = makeNewListingFromPost(request.body, request.session.login.who.id);
-        if (!newListing) {
-            return response.status(400).send(JSON.stringify({
-                type: 'LISTING_INVALID_DATA_EXCEPTION',
-                message: 'Listing data did not contain all requisite fields'
-            }));
-        } else {
-            newListing.listing.save(function (err) {
-                if (!err) {
-                    return response
-                            .status(201)
-                            .set('Location', '/listing/'+newListing.listing._id)
-                            .send({rsc_id: newListing.listing._id});
-                } else {
-                    return response.status(500).send(error('DISK_SAVE_FAILURE', err));
-                }
-            });
-        }
-    })
-    .get(function(request,response){
-      response.set('Content-Type', 'application/json');
-         return Listings.Listing.find(function (err, listings) {
-            if (!err){
-              return response.status(200).send(listings.reverse());
-            } else {
-              return response.status(404).send('{}');
-            }
-        });
-    });
-
-app.get('/search/:vars/:val', function(request,response){
-  response.set('Content-Type', 'application/json');
-	var val = request.params.val;
-	return Listings.Listing.find({_id:val}, function (err, listing) {
-	    if (!err){
-	        response.status(200).send(JSON.stringify({
-                listing: listing
-            }));
-	    } else {
-	      response.status(404).send('{}');
-	    }
-	});
-});
+    .post(ListingRoutes.postListing)
+    .get(ListingRoutes.getListing);
 
 app.get('/listing/:uid', function(request,response){
   response.set('Content-Type', 'application/json');

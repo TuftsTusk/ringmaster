@@ -103,14 +103,11 @@ exports.getUserConfirmById = function(request, response) {
     });
 }
 
-exports.putUserPasswordById = function(request, response) {
+exports.putMyPassword = function(request, response) {
     if (!request.session.login || !request.session.login.valid) {
         return response.status(400).send(error('NOT_LOGGED_IN_FAILURE', 'User not logged in'));
     } else {
-        var targetid = request.params.targetid;
-        
-        if (targetid !== request.session.login.who.id)
-            return response.status(400).send(error('SESSION_AUTHENTICATION_FAILURE', 'Invalid session data'));
+        var targetid = request.session.login.who.id;
 
         if (!Utils.checkForKeys(["password", "confirmpass"], request.body) ||
                 typeof request.body.password !== "string") {
@@ -303,7 +300,8 @@ exports.postMeLogin = function(request, response) {
                 when: Date.now(),
                 who: {
                     id: user._id,
-                    email: user.email
+                    email: user.email,
+                    role: user.role
                 }
             };
             return response.status(204).send();
