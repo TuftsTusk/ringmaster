@@ -19,7 +19,7 @@ exports.deleteUnconfWithEmail = function(email, callback) {
 
 exports.registerAccount = function(email, password, confirmpass, callback) {
     request(app)
-        .post('/user/register')
+        .post('/me/register')
         .send({
             email: email,
             password: password,
@@ -31,7 +31,7 @@ exports.registerAccount = function(email, password, confirmpass, callback) {
 
 exports.logInToAccount = function(email, password, callback) {
     request(app)
-        .post('/user/login')
+        .post('/me/login')
         .send({
             email: email,
             password: password
@@ -42,7 +42,7 @@ exports.logInToAccount = function(email, password, callback) {
 
 exports.logOutOfAccount = function(cookie, callback) {
     request(app)
-        .post('/user/logout')
+        .post('/me/logout')
         .send({})
         .set('Accept', 'application/json')
         .set('Cookie', cookie)
@@ -59,8 +59,7 @@ exports.confirmAccount = function(id, key, callback) {
 
 exports.recoverPassword = function(email, callback) {
     request(app)
-        .get('/user/recover')
-        .query({email:email})
+        .get('/user/'+email+'/recover')
         .set('accept', 'application/json')
         .end(callback);
 }

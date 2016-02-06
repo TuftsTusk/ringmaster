@@ -13,7 +13,7 @@ describe('Account lifecycle', function() {
 
     it('Fail to create an account with no data', function(done){
     request(app)
-        .post('/user/register')
+        .post('/me/register')
         .send({})
         .set('Accept', 'application/json')
         .expect(400)
@@ -26,7 +26,7 @@ describe('Account lifecycle', function() {
 
     it('Fail to create an account with a non-tufts email', function(done){
     request(app)
-        .post('/user/register')
+        .post('/me/register')
         .send({email: 'some.jerk@gmail.com', password: 'foo', confirmpass: 'foo'})
         .set('Accept', 'application/json')
         .expect(400)
@@ -39,7 +39,7 @@ describe('Account lifecycle', function() {
 
     it('Fail to create an account with mismatched passwords', function(done){
     request(app)
-        .post('/user/register')
+        .post('/me/register')
         .send({email: 'some.jerk@tufts.edu', password: 'foo', confirmpass: 'bar'})
         .set('Accept', 'application/json')
         .expect(400)
