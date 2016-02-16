@@ -1,7 +1,7 @@
 mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var ListingSchema = new Schema({
+var SubletListingSchema = new Schema({
     user_id: { type: String, required: true },
     address: { type: String, required: true },
     date_range: { type: String, required: true },
@@ -14,4 +14,6 @@ var ListingSchema = new Schema({
     notes: { type: String, required: false },
     last_modified: { type: Date, default: Date.now }
 });
-module.exports = mongoose.model('Listing', ListingSchema);
+
+
+module.exports = mongoose.model('SubletListing', SubletListingSchema);

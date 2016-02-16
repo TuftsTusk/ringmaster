@@ -14,7 +14,8 @@ bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
 // load Schema
-var Listing = require('./models/listing.js');
+var MiscListing = require('./models/misc_listing.js');
+var SubletListing = require('./models/sublet_listing.js');
 var Unconf_User = require('./models/unconf_user.js');
 var User = require('./models/user.js');
 
@@ -379,18 +380,29 @@ app.get('/alive', function(request, response){
 app.route('/listing')
     .post(function(request, response) {
         response.set('Content-Type', 'application/json');
-        var listing = new Listing;
+        if (request.body == undefined || request.body.type == undefined) {
+          return response.status(400).send(JSON.stringify({success: false, message: "No listing type found in request"}));
+        }
+        if (request.body.type == 'other') {
+          var listing = new MiscListing;
+          listing.title = request.body.Title;
+          listing.description = request.body.Description;
+          listing.price = request.body.Price;
+          console.log(JSON.stringify(request.body));
+        }
+        else if (request.body.type == 'sublet') {
+          var listing = new SubletListing;
+          listing.address = request.body.address;
+          listing.date_range = request.body.date_range;
+          listing.rent = request.body.rent;
+          listing.bedrooms_available = request.body.bedrooms;
+          listing.bathrooms = request.body.bathrooms;
+          listing.image_gallery_link = ('image_gallery_link' in request.body) ? request.body.image_gallery_link : "";
+          listing.est_utilities = ('est_utilities' in request.body) ? request.body.est_utilities : "";
+          listing.notes = ('notes' in request.body) ? request.body.notes : "";
+        }
+
         listing.user_id = 0;
-        listing.address = request.body.address;
-        listing.date_range = request.body.date_range;
-        listing.rent = request.body.rent;
-        listing.bedrooms_available = request.body.bedrooms;
-        listing.bathrooms = request.body.bathrooms;
-        listing.image_gallery_link = ('image_gallery_link' in request.body) ? request.body.image_gallery_link : "";
-        listing.est_utilities = ('est_utilities' in request.body) ? request.body.est_utilities : "";
-        listing.notes = ('notes' in request.body) ? request.body.notes : "";
-
-
         listing.save(function(err){
             if (!err) {
                 return response.status(200).send(JSON.stringify({success: true, rsc_id: listing._id}));
