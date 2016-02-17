@@ -31,10 +31,11 @@ describe('Listing lifecycle', function(){
                 done();
             });
     };
-    
+
     request(app)
         .post('/listing')
         .send({
+            type:'sublet',
             address: "587 Boston Ave., Somerville MA 02144",
             date_range: "2015-08-02,2016-08-02",
             rent: 750,
