@@ -27,14 +27,19 @@ describe('Listing lifecycle', function(){
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .end(function(err, res) {
-                if (err) done(err);
-                done();
+                if (err) {
+                  console.log("ERROR");
+                  done(err);
+                } else {
+                  done();
+                }
             });
     };
-    
+
     request(app)
         .post('/listing')
         .send({
+            type:'sublet',
             address: "587 Boston Ave., Somerville MA 02144",
             date_range: "2015-08-02,2016-08-02",
             rent: 750,
@@ -48,10 +53,13 @@ describe('Listing lifecycle', function(){
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .end(function(err, res) {
-            if (err) done(err);
-            var body = res.body;
-            expect(body.success).to.equal(true);
-            deleteWithID(body.rsc_id);
+            if (err) {
+              done(err);
+            } else {
+              var body = res.body;
+              expect(body.success).to.equal(true);
+              deleteWithID(body.rsc_id);
+            }
         });
   });
 });
