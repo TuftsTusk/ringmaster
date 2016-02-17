@@ -27,8 +27,12 @@ describe('Listing lifecycle', function(){
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .end(function(err, res) {
-                if (err) done(err);
-                done();
+                if (err) {
+                  console.log("ERROR");
+                  done(err);
+                } else {
+                  done();
+                }
             });
     };
 
@@ -49,10 +53,13 @@ describe('Listing lifecycle', function(){
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .end(function(err, res) {
-            if (err) done(err);
-            var body = res.body;
-            expect(body.success).to.equal(true);
-            deleteWithID(body.rsc_id);
+            if (err) {
+              done(err);
+            } else {
+              var body = res.body;
+              expect(body.success).to.equal(true);
+              deleteWithID(body.rsc_id);
+            }
         });
   });
 });
