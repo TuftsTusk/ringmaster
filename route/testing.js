@@ -70,7 +70,7 @@ function ensureLoginSession(request) {
     return false;
 }
 
-exports.ensureEnv(request, response, next) {
+exports.ensureEnv = function(request, response, next) {
     for (var i=0; i<WHITELIST.length; i++) {
         var line = WHITELIST[i];
         if (line[0].test(request.originalUrl)) {
@@ -78,13 +78,14 @@ exports.ensureEnv(request, response, next) {
                 if (request.method === line[1][j]) {
                     if (!line[2][j] ||
                         (ensureLoginSession(request) &&
-                            Consts.request.session.login.who.role))) {
+                            Consts.checkPriv(request.session.login.who.role, line[2][j]))) {
+                            return next();
                     }
                 }
             }
             //TODO: more meaningful response here
-            response.status(403).send();
         }
     }
+    return response.status(403).send();
 }
 
