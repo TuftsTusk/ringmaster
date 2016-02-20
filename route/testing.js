@@ -32,16 +32,29 @@ var PROD = Consts.PROD;
 
 var WHITELIST = [
     [/^\/user\/\w+\/?$/i , ["GET"], [Consts.ROLE_CONFIRMED_PUBLIC]],
-    [/^\/user\/\w+\/confirm\/?$/i, ["GET"], [Consts.ROLE_UNCONFIRMED_PUBLIC]],
+    [/^\/user\/\w+\/confirm\?[\w=&]+$/i, ["GET"], [Consts.ROLE_UNCONFIRMED_PUBLIC]],
     [/^\/user\/(([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))\/recover$/i, ["POST"], [Consts.ROLE_CONFIRMED_PUBLIC]],
     [/^\/me\/password\/?$/i, ["PUT"], [Consts.ROLE_CONFIRMED_PUBLIC]],
-    [/^\/listing\/?$/i, ["GET"], [Consts.ROLE_INVALID]],
+    [/^\/me\/register\/?$/i, ["POST"], [Consts.ROLE_INVALID]],
+    [/^\/me\/login\/?$/i, ["POST"], [Consts.ROLE_INVALID]],
+    [/^\/me\/logout\/?$/i, ["POST"], [Consts.ROLE_CONFIRMED_PUBLIC]],
+    [/^\/listing\/?$/i, ["GET", "POST"], [Consts.ROLE_INVALID, Consts.ROLE_CONFIRMED_PUBLIC]],
     [/^\/listing\/\w+\/?$/i, ["GET"], [Consts.ROLE_CONFIRMED_PUBLIC]],
     [/^\/listing\/\w+\/flag\/?$/i, ["GET", "POST"], [Consts.ROLE_MODERATOR_PUBLIC, Consts.ROLE_CONFIRMED_PUBLIC]],
     [/^\/listing\/\w+\/approve\/?$/i, ["PUT"], [Consts.ROLE_MODERATOR_PUBLIC]],
     [/^\/listing\/\w+\/quarrentine\/?$/i, ["PUT"], [Consts.ROLE_MODERATOR_PUBLIC]],
     [/^\/listing\/\w+\/(?!approve|quarrentine)\/?$/i, ["PUT"], [Consts.ROLE_CONFIRMED_PUBLIC]],
 ];
+
+//TODO: All test endpoints should require a high level role, and the
+//      role can be assigned as simply a hard-coded cookie value in all requests
+if (ENV === DEV || ENV === STG) {
+    WHITELIST = WHITELIST.concat([
+        [/^\/unconf_user\/[\w.@]+\/?$/, ["DELETE"], [Consts.ROLE_INVALID]],
+        [/^\/user\/[\w.@]+\/?$/, ["DELETE"], [Consts.ROLE_INVALID]],
+        [/^\/listing\/\w+\/?$/, ["DELETE"], [Consts.ROLE_INVALID]]
+    ]);
+}
 
 function error(type, message) {
     return JSON.stringify({

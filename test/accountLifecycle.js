@@ -5,12 +5,6 @@ var app = require('../app.js');
 var account = require('./macros/account.js');
 
 describe('Account lifecycle', function() {
-    after('Remove all residual data', function() {
-        request(app)
-            .del('/all')
-            .send({});
-    });
-
     it('Fail to create an account with no data', function(done){
     request(app)
         .post('/me/register')

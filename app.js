@@ -189,13 +189,6 @@ if (ENV === DEV || ENV === STG) {
             }
         });
     });
-
-    app.delete('/all', function(request, response) {
-        User.remove({});
-        Unconf_User.remove({});
-        Listing.remove({});
-        response.sendStatus(204)
-    });
 }
 
 /*
