@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "mocha test/*.js"
+    "test": "./purge.sh && mocha test/*.js"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",

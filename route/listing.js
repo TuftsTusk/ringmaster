@@ -65,7 +65,7 @@ function makeNewListingFromPost(body, user_id) {
         if (body.type === Listings.MISC) {
             var miscListing = new Listings.MiscListing;
             miscListing.title = body.title;
-            miscListing.body = body.body;
+            miscListing.description = body.description;
             miscListing.user_id = user_id;
             return {
                 type: Listings.MISC,
@@ -100,6 +100,7 @@ exports.postListing = function(request, response) {
                         .set('Location', '/listing/'+newListing.listing._id)
                         .send({rsc_id: newListing.listing._id});
             } else {
+                console.log(err);
                 return response.status(500).send(error('DISK_SAVE_FAILURE', err));
             }
         });

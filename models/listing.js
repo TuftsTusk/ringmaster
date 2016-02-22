@@ -18,7 +18,7 @@ var Listing = mongoose.model('Listing', listingSchema);
 
 var miscSchema = new Schema({
     title: { type: String, required: true },
-    body: { type: String, required: true }
+    description: { type: String, required: true }
 }, options);
 
 var MISC = 'MiscListing';
@@ -32,6 +32,13 @@ var bookSchema = new Schema({
 
 var BOOK = 'BookListing';
 var BookListing = Listing.discriminator(BOOK, bookSchema);
+
+var subletSchema = new Schema({
+    address: { type: String, required: true}
+}, options);
+
+var SUBLET = 'SubletListing';
+var SubletListing = Listing.discriminator(SUBLET, subletSchema);
 
 module.exports = {
     Listing: Listing,

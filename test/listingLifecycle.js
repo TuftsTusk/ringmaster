@@ -79,7 +79,7 @@ describe('Listing lifecycle', function(){
                 makeMiscPost(cookie, {
                     type: 'MiscListing',
                     title: 'Hurr Durr',
-                    body: 'Something for sale!@!!!!0!'
+                    description: 'Something for sale!@!!!!0!'
                 }, function(err, res) {
                     if (err) done(err);
                     expect(res.status).to.equal(201);

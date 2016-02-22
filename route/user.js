@@ -67,7 +67,7 @@ exports.getUserById = function(request, response) {
 
 exports.getUserConfirmById = function(request, response) {
     Unconf_User.findOne({_id: request.params.id}, function(err, user) {
-        if (err) {
+        if (err || !user) {
             return response.status(400).send(error(
                 'INVALID_USER_ID',
                 'Invalid user id'
