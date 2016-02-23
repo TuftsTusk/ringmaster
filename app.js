@@ -208,6 +208,10 @@ app.post('/me/login', UserRoutes.postMeLogin);
 
 app.put('/me/password', UserRoutes.putMyPassword);
 
+app.get('/me/listing', UserRoutes.getMeListing);
+
+app.get('/me/listing/filter/:filter', UserRoutes.getMeListingByFilter);
+
 app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
 
 app.get('/alive', function(request, response){

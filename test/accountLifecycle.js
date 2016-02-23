@@ -96,11 +96,17 @@ describe('Account lifecycle', function() {
                 expect(res.status).to.equal(204);
                 account.recoverPassword(email, function(err, res) {
                     if (err) done(err);
-                    //expect(res.status).to.equal(204);
-                    account.deleteWithEmail(email, function(err, res) {
+                    expect(res.status).to.equal(200);
+                    var p = pass + pass;
+                    var cp = p;
+                    account.changeMyPassword(res.body.id, res.body.confirm_key, p, cp, function(err, res) {
                         if (err) done(err);
                         expect(res.status).to.equal(204);
-                        done();
+                        account.deleteWithEmail(email, function(err, res) {
+                            if (err) done(err);
+                            expect(res.status).to.equal(204);
+                            done();
+                        });
                     });
                 });
             });

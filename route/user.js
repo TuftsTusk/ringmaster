@@ -104,55 +104,74 @@ exports.getUserConfirmById = function(request, response) {
 }
 
 exports.putMyPassword = function(request, response) {
-    if (!request.session.login || !request.session.login.valid) {
-        return response.status(400).send(error('NOT_LOGGED_IN_FAILURE', 'User not logged in'));
-    } else {
-        var targetid = request.session.login.who.id;
-
-        if (!Utils.checkForKeys(["password", "confirmpass"], request.body) ||
-                typeof request.body.password !== "string") {
-            return response.status(400).send(error(
-                'MISSTING_PARAM_FAILURE',
-                'Parameter was missing from the request'
-            ));
-        }
-
-        if (request.body.password != request.body.confirmpass) {
-            return response.status(400).send(error(
-                'PASSWORD_MISMATCH_FAILURE',
-                'Passwords did not match'
-            ));
-        }
-
-
-        User.findOne({_id: targetid}, function(err, user) {
-            if (err) {
-                return response.status(500).send(error(
-                    'DISK_SAVE_FAILURE',
-                    err 
-                ));
-            } else if (!user) {
-                return response.status(500).send(error(
-                    'UNKNOWN_FAILURE',
-                    'An unknown failure occured' 
-                ));
-            } else {
-                var salt = bcrypt.genSaltSync(10);
-                user.passwordHash = bcrypt.hashSync(request.body.password, salt);
-                user.passwordSalt = salt;
-                user.save(function (err) {
-                    if (err) {
-                        return response.status(500).send(error(
-                            'DISK_SAVE_FAILURE',
-                            err 
-                        ));
-                    }
-                    return response.sendStatus(204);
-                });
-            }
-        });
-    }
+    var pass_change = ((!request.session.login || !request.session.login.valid)
+                        && Validate.checkForKeys(["user_id", "confirm_key"], request.body));
     
+    var targetid = pass_change ? request.body.user_id : request.session.login.who.id;
+    if (targetid == null)
+        return response.status(400).send(error('NOT_LOGGED_IN_FAILURE', 'User not logged in'));
+
+    if (!Validate.checkForKeys(["password", "confirmpass"], request.body) ||
+            typeof request.body.password !== "string") {
+        return response.status(400).send(error(
+            'MISSTING_PARAM_FAILURE',
+            'Parameter was missing from the request'
+        ));
+    }
+
+    if (request.body.password != request.body.confirmpass) {
+        return response.status(400).send(error(
+            'PASSWORD_MISMATCH_FAILURE',
+            'Passwords did not match'
+        ));
+    }
+
+
+    User.findOne({_id: targetid}, function(err, user) {
+        if (err) {
+            return response.status(500).send(error(
+                'DISK_SAVE_FAILURE',
+                err 
+            ));
+        } else if (!user) {
+            return response.status(500).send(error(
+                'UNKNOWN_FAILURE',
+                'An unknown failure occured' 
+            ));
+        } else {
+            if (pass_change) {
+                if (!user.recovery.requested)
+                    return response.status(500).send(error(
+                        'RECOVERY_NOT_REQUESTED_FAILURE',
+                        'Password change request was not on file'
+                    ));
+                else if (user.recovery.key != request.body.confirm_key)
+                    return response.status(400).send(error(
+                        'INVALID_CONFIRMATION_KEY_FAILURE',
+                        'The confirmation key used to change the password was invalid'
+                    ));
+                else if ((Date.now() - user.recovery.when) > Consts.MAX_RECOVERY_KEY_AGE)
+                    return response.status(400).send(error(
+                        'CONFIRMATION_KEY_EXPIRATION_FAILURE',
+                        'The confirmation key used to change the password has already expired'
+                    ));
+                user.recovery.requested = false;
+            }
+
+            var salt = bcrypt.genSaltSync(10);
+            user.passwordHash = bcrypt.hashSync(request.body.password, salt);
+            user.passwordSalt = salt;
+            user.save(function (err) {
+                if (err) {
+                    return response.status(500).send(error(
+                        'DISK_SAVE_FAILURE',
+                        err 
+                    ));
+                }
+                return response.sendStatus(204);
+            });
+        }
+    });
 }
 
 exports.postUserRecoverByEmail = function(request, response) {
@@ -170,17 +189,25 @@ exports.postUserRecoverByEmail = function(request, response) {
         user.recovery.key = key;
         user.recovery.when = Date.now();
         
-        if (ENV === PROD) {
-            //TODO: Generate email and blast it off
-            return sendNotYetImplementedFailure(response);
-        } else if (ENV === DEV || ENV === STG) {
-            return response.status(200).send(JSON.stringify({
-                id: user._id,
-                confirm_key: key
-            }));
-        } else {
-            return sendEnvConfigFailure(response);
-        }   
+        user.save(function(err) {
+            if (err) {
+                return response.status(500).send(error(
+                    'DISK_SAVE_FAILURE',
+                    err 
+                ));
+            }
+            if (ENV === PROD) {
+                //TODO: Generate email and blast it off
+                return sendNotYetImplementedFailure(response);
+            } else if (ENV === DEV || ENV === STG) {
+                return response.status(200).send(JSON.stringify({
+                    id: user._id,
+                    confirm_key: key
+                }));
+            } else {
+                return sendEnvConfigFailure(response);
+            }   
+        });
     });
 }
 
@@ -324,5 +351,25 @@ exports.postMeLogout = function(request, response) {
         'LOGIN_SESSION_NOT_FOUND_FAILURE',
         'Unsuccessfully logged out because not logged in'
     ));
+}
+
+exports.getMeListing = function(request, response) {
+    request.params = {
+        filter: ""
+    };
+    return exports.getMeListingByFilter(request, response);
+}
+
+exports.getMeListingByFilter = function(request, response) {
+    if (!request.session.login || !request.session.login.valid) {
+        return response.status(400).send(error('NOT_LOGGED_IN_FAILURE', 'User not logged in'));
+    } else {
+        //TODO: validate the filter
+        Listings.Listing.find({user_id: request.session.login.who.id}, function(listings, err) {
+            if (err) return response.status(500).send(error('LISTING_LOOKUP_FAILURE', 'Listings for the current user could not be found'));
+            else return response.status(200).send(JSON.stringify(err));
+        });
+    }
+
 }
 

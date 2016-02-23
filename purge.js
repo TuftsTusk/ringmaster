@@ -10,19 +10,19 @@ function purge() {
         session_count = db.sessions.count({});
         
         if (user_count > 0) {
-            print("!!! Removing "+user_count+" users !!!");
+            print("!!! Removing "+user_count+" user(s) !!!");
             db.users.remove({});
         }
         if (unconf_user_count > 0) {
-            print("!!! Removing "+unconf_user_count+" unconf_users !!!");
+            print("!!! Removing "+unconf_user_count+" unconf_user(s) !!!");
             db.unconf_users.remove({});
         }
         if (listing_count > 0) {
-            print("!!! Removing "+listing_count+" listings !!!");
+            print("!!! Removing "+listing_count+" listing(s) !!!");
             db.listings.remove({});
         }
         if (session_count > 0) {
-            print("!!! Removing "+session_count+" sessions !!!");
+            print("!!! Removing "+session_count+" session(s) !!!");
             db.sessions.remove({});
         }
     }

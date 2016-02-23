@@ -59,7 +59,20 @@ exports.confirmAccount = function(id, key, callback) {
 
 exports.recoverPassword = function(email, callback) {
     request(app)
-        .get('/user/'+email+'/recover')
+        .post('/user/'+email+'/recover')
+        .set('accept', 'application/json')
+        .end(callback);
+}
+
+exports.changeMyPassword = function(user_id, confirm_key, password, confirmpass, callback) {
+    request(app)
+        .put('/me/password')
+        .send({
+            password: password,
+            confirmpass: confirmpass,
+            confirm_key: confirm_key,
+            user_id: user_id
+        })
         .set('accept', 'application/json')
         .end(callback);
 }
