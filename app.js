@@ -15,9 +15,9 @@ bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
 // load Schema
-var Listings = require('./models/listing.js');
-var Unconf_User = require('./models/unconf_user.js');
-var User = require('./models/user.js');
+var Listings = require('./lib/models/listing.js');
+var Unconf_User = require('./lib/models/unconf_user.js');
+var User = require('./lib/models/user.js');
 
 // Tusk Libraries
 var Validate = require('./lib/validation.js');
@@ -34,9 +34,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'jade');
 
 // Tusk Routes
-var UserRoutes = require('./route/user.js');
-var ListingRoutes = require('./route/listing.js');
-var TestingRoutes = require('./route/testing.js');
+var UserRoutes = require('./lib/route/user.js');
+var ListingRoutes = require('./lib/route/listing.js');
+var TestingRoutes = require('./lib/route/testing.js');
 
 var ENV = Consts.ENV;
 var UNDEF = Consts.UNDEF;
@@ -208,9 +208,9 @@ app.post('/me/login', UserRoutes.postMeLogin);
 
 app.put('/me/password', UserRoutes.putMyPassword);
 
-app.get('/me/listing', UserRoutes.getMeListing);
+app.get('/me/listing', ListingRoutes.getMeListing);
 
-app.get('/me/listing/filter/:filter', UserRoutes.getMeListingByFilter);
+app.get('/me/listing/filter/:filter', ListingRoutes.getMeListingByFilter);
 
 app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
 

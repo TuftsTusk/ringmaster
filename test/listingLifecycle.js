@@ -82,6 +82,7 @@ describe('Listing lifecycle', function(){
                     description: 'Something for sale!@!!!!0!'
                 }, function(err, res) {
                     if (err) done(err);
+                    console.log(res.body);
                     expect(res.status).to.equal(201);
 
                     deletePostFromId(res.body.rsc_id, function(err, res) {
