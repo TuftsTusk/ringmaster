@@ -85,7 +85,7 @@ exports.postListing = function(request, response) {
             'Listing could not be posted because the user is not logged in'
         ));
     }
-    
+
     var newListing = makeNewListingFromPost(request.body, request.session.login.who.id);
     if (!newListing) {
         return response.status(400).send(JSON.stringify({
@@ -121,7 +121,7 @@ exports.getListing = function(request, response) {
 exports.getListingById = function(request, response) {
     response.set('Content-Type', 'application/json');
     var uid = request.params.uid;
-    return Listing.Listing.find({_id:uid}, function (err, listing) {
+    return Listings.Listing.find({_id:uid}, function (err, listing) {
         if (!err){
             response.status(200).send(JSON.stringify({
                 listing: listing
@@ -131,4 +131,3 @@ exports.getListingById = function(request, response) {
         }
     });
 }
-

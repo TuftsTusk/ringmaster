@@ -23,6 +23,15 @@ var deletePostFromId = function(id, callback) {
         .end(callback);
 };
 
+var getPostFromId = function(id, cookie, callback) {
+    request(app)
+        .get('/listing/'+id)
+        .send({})
+        .set('Cookie', cookie)
+        .set('Accept', 'application/json')
+        .end(callback);
+};
+
 
 describe('Listing lifecycle', function(){
     it('Fail to add a listing with no data', function(done){
@@ -38,7 +47,7 @@ describe('Listing lifecycle', function(){
                 account.logInToAccount(email, pass, function(err, res) {
                     if (err) done(err);
                     expect(res.status).to.equal(204);
-                    
+
                     var cookie = res.headers['set-cookie'][0];
                     makeMiscPost(cookie, {}, function(err, res) {
                         if(err) done(err);
@@ -73,31 +82,38 @@ describe('Listing lifecycle', function(){
             account.logInToAccount(email, pass, function(err, res) {
                 if (err) done(err);
                 expect(res.status).to.equal(204);
-                
+
                 var cookie = res.headers['set-cookie'][0];
 
                 makeMiscPost(cookie, {
                     type: 'MiscListing',
                     title: 'Hurr Durr',
                     description: 'Something for sale!@!!!!0!'
-                }, function(err, res) {
+                },
+                function(err, res) {
                     if (err) done(err);
                     expect(res.status).to.equal(201);
+                    var listingId = res.body.rsc_id;
+                    getPostFromId(listingId, cookie, function(err,res){
+                      if (err) done(err);
+                      expect(res.status).to.equal(200);
+                      
+                      deletePostFromId(listingId, function(err, res) {
+                          if (err) done(err);
+                          expect(res.status).to.equal(204);
 
-                    deletePostFromId(res.body.rsc_id, function(err, res) {
-                        if (err) done(err);
-                        expect(res.status).to.equal(204);
+                          account.logOutOfAccount(cookie, function(err, res) {
+                              if (err) done(err);
+                              expect(res.status).to.equal(204);
 
-                        account.logOutOfAccount(cookie, function(err, res) {
-                            if (err) done(err);
-                            expect(res.status).to.equal(204);
+                              account.deleteWithEmail(email, function(err, res) {
+                                  if (err) done(err);
+                                  expect(res.status).to.equal(204);
+                                  done();
+                              });
+                          });
+                      });
 
-                            account.deleteWithEmail(email, function(err, res) {
-                                if (err) done(err);
-                                expect(res.status).to.equal(204);
-                                done();
-                            });
-                        });
                     });
                 });
             });

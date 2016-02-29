@@ -248,20 +248,9 @@ function ensureLoginSession(request) {
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);
+app.route('/listing/:uid')
+        .get(ListingRoutes.getListingById);
 
-app.get('/listing/:uid', function(request,response){
-  response.set('Content-Type', 'application/json');
-	var uid = request.params.uid;
-	return Listing.Listing.find({_id:uid}, function (err, listing) {
-	    if (!err){
-	        response.status(200).send(JSON.stringify({
-                listing: listing
-            }));
-	    } else {
-            response.status(404).send('{}');
-	    }
-	});
-});
 
 if (ENV === DEV || ENV === STG) {
     app.delete('/listing/:uid', function(request,response){
