@@ -17,12 +17,11 @@ var makeMiscPost = function(cookie, body, callback) {
 
 var deletePostFromId = function(id, callback) {
     request(app)
-        .del('/listing/'+id)
+        .del('/dev/listing/'+id)
         .send({})
         .set('Accept', 'application/json')
         .end(callback);
 };
-
 
 describe('Listing lifecycle', function(){
     it('Fail to add a listing with no data', function(done){
@@ -82,7 +81,6 @@ describe('Listing lifecycle', function(){
                     description: 'Something for sale!@!!!!0!'
                 }, function(err, res) {
                     if (err) done(err);
-                    console.log(res.body);
                     expect(res.status).to.equal(201);
 
                     deletePostFromId(res.body.rsc_id, function(err, res) {
@@ -106,3 +104,4 @@ describe('Listing lifecycle', function(){
     });
   });
 });
+

@@ -5,14 +5,14 @@ var app = require('../../app.js');
 
 exports.deleteWithEmail = function(email, callback) {
     request(app)
-        .del('/user/'+email)
+        .del('/dev/user/'+email)
         .send({})
         .end(callback);
 };
 
 exports.deleteUnconfWithEmail = function(email, callback) {
     request(app)
-        .del('/unconf_user/'+email)
+        .del('/dev/unconf_user/'+email)
         .send({})
         .end(callback);
 };

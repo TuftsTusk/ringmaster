@@ -102,7 +102,7 @@ app.use(session({
 app.use(TestingRoutes.ensureEnv);
 
 if (ENV === DEV || ENV === STG)
-    app.get('/users', function(request, response) {
+    app.get('/dev/users', function(request, response) {
         response.set('Content-Type', 'application/json');
         User.find({}, function(err, users) {
             if (!err) {
@@ -170,7 +170,7 @@ app.post('/me/register', UserRoutes.postMeRegister);
 app.post('/me/logout', UserRoutes.postMeLogout);
 
 if (ENV === DEV || ENV === STG) {
-    app.delete('/unconf_user/:email', function(request, response) {
+    app.delete('/dev/unconf_user/:email', function(request, response) {
         Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
             if (err || !resp) {
                 return response.status(500).send(error('UNCONF_USER_DELETION_FAILURE', 'An unconfirmed user account failed to be deleted'));
@@ -180,7 +180,7 @@ if (ENV === DEV || ENV === STG) {
         });
     });
 
-    app.delete('/user/:email', function(request, response) {
+    app.delete('/dev/user/:email', function(request, response) {
         User.findOneAndRemove({email:request.params.email}, function(err, user) {
             if (err || !user) {
                 return reponse.status(404).send();
@@ -264,7 +264,7 @@ app.get('/listing/:uid', function(request,response){
 });
 
 if (ENV === DEV || ENV === STG) {
-    app.delete('/listing/:uid', function(request,response){
+    app.delete('/dev/listing/:uid', function(request,response){
         var uid = request.params.uid;
         return Listings.Listing.findOneAndRemove({_id:uid}, function (err, listing) {
             if (!err && listing) {

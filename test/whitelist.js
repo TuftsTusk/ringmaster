@@ -50,7 +50,8 @@ Endpoint.prototype.getRoles = function() {
 }
 var generateTestUrl = function(url) {
     return url.replace(/:id/i, "abc123")
-                    .replace(/:email/i, "some.jerk@tufts.edu");
+                    .replace(/:email/i, "some.jerk@tufts.edu")
+                    .replace(/:filters/i, JSON.stringify({}));
 }
 
 describe('Tusk Marketplace Whitelist', function() {
@@ -61,7 +62,7 @@ describe('Tusk Marketplace Whitelist', function() {
         var all_endpoints = [
             _("/user/:id", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/user/:id/confirm", ["GET"], [consts.ROLE_INVALID]),
-            _("/user/:email/recover", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/user/:email/recover", ["POST"], [consts.ROLE_INVALID]),
             _("/me/password", ["PUT"], [consts.ROLE_INVALID]),
             _("/me/register", ["POST"], [consts.ROLE_INVALID]),
             _("/me/login", ["POST"], [consts.ROLE_INVALID]),
@@ -74,12 +75,11 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/listing/:id/quarrentine", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
         ];
         var dev_endpoints = [
-            _("/unconf_user/:email", ["DELETE"], [consts.ROLE_ROOT]),
-            _("/user/:email", ["DELETE"], [consts.ROLE_ROOT]),
-            _("/listing/:id", ["DELETE"], [consts.ROLE_ROOT])
+            _("/dev/unconf_user/:email", ["DELETE"], [consts.ROLE_ROOT]),
+            _("/dev/user/:email", ["DELETE"], [consts.ROLE_ROOT]),
+            _("/dev/listing/:id", ["DELETE"], [consts.ROLE_ROOT])
         ];
         all_endpoints = all_endpoints.concat(dev_endpoints);
-
 
         for (var i=0; i<all_endpoints.length; i++) {
             var all_reqs = all_endpoints[i].generateAllPossibleRequests();
@@ -89,19 +89,20 @@ describe('Tusk Marketplace Whitelist', function() {
                 var method = all_reqs[j][1];
                 var role = all_reqs[j][2];
                 var expect_success = false;
+                
                 for (var k=0; k<valid_reqs.length; k++) {
-                    if (url === valid_reqs[k][0] &&
-                        method === valid_reqs[k][1] &&
-                        consts.checkPriv(role, valid_reqs[k][2])) {
+                    var url_chk = url === valid_reqs[k][0];
+                    var method_chk = method === valid_reqs[k][1];
+                    var priv_chk = consts.checkPriv(role, valid_reqs[k][2]);
+                    if (url_chk && method_chk && priv_chk) {
                         expect_success = true;
+                        break;
                     }
                 }
                 
-                t_url = generateTestUrl(url);
-                console.log(testing.hasUrlPermission(t_url, method, role) + " " + expect_success);
-                if (testing.hasUrlPermission(t_url, method, role) != expect_success)
-                    console.log("Uh oh! "+t_url+" "+method+" "+role.toString(16));
-                expect(testing.hasUrlPermission(t_url, method, role)).to.equal(expect_success);
+                var has_permission = testing.hasUrlPermission(t_url, method, role);
+                var t_url = generateTestUrl(url);
+                expect(has_permission).to.equal(expect_success);
             }
         }
 
