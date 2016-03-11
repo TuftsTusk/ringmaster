@@ -2,19 +2,21 @@ var expect = require('expect.js');
 var assert = require('assert');
 var request = require('supertest');
 var app = require('../../app.js');
+var m_user = require('../../lib/models/user.js');
+var m_unconf_user = require('../../lib/models/unconf_user.js');
 
 exports.deleteWithEmail = function(email, callback) {
-    request(app)
-        .del('/dev/user/'+email)
-        .send({})
-        .end(callback);
+    m_user.findOneAndRemove({email:email}, function(err, user) {
+        var _status =(!err && user) ? 204 : 500;
+        callback(err, {"status" : _status});
+    });
 };
 
 exports.deleteUnconfWithEmail = function(email, callback) {
-    request(app)
-        .del('/dev/unconf_user/'+email)
-        .send({})
-        .end(callback);
+    m_unconf_user.findOneAndRemove({email:email}, function(err, user) {
+        var _status =(!err && user) ? 204 : 500;
+        callback(err, {"status" : _status});
+    });
 };
 
 exports.registerAccount = function(email, password, confirmpass, callback) {

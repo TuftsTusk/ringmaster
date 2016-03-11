@@ -10,7 +10,6 @@ format = require('util').format,
 cookieParser = require('cookie-parser'),
 bodyParser = require('body-parser'),
 mongoose = require('mongoose'),
-validator = require('validator'),
 bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
@@ -24,7 +23,7 @@ var Validate = require('./lib/validation.js');
 var Utils = require('./lib/utils.js');
 var Consts = require('./lib/consts.js');
 
-// Configuration
+// Load Middleware
 var app = express();
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -57,12 +56,6 @@ if (ENV < 0) {
         console.log("NODE_ENV variable assigned to an unrecognized value.");
     console.log("Possible values: development, staging, production");
     process.exit(1);
-}
-
-function log(obj) {
-    if (ENV === DEV || ENV === STG) {
-        console.log(obj);
-    }
 }
 
 var whitelist = ['http://localhost:8080', 'https://tuskdumbo.herokuapp.com', 'http://tuskmarketplace.com', 'https://tuskmarketplace.com', 'https://tuskdumbostaging.herokuapp.com'];
@@ -100,21 +93,6 @@ app.use(session({
 }));
 
 app.use(TestingRoutes.ensureEnv);
-
-if (ENV === DEV || ENV === STG)
-    app.get('/dev/users', function(request, response) {
-        response.set('Content-Type', 'application/json');
-        User.find({}, function(err, users) {
-            if (!err) {
-                return response.status(200).send(JSON.stringify({
-                    users: users
-                }));
-            } else
-                return sendEnvConfigFailure(response);
-        });
-    });
-
-
 
 /*
  *   Method | GET
@@ -168,28 +146,6 @@ app.post('/me/register', UserRoutes.postMeRegister);
  *                                                an invalid session cookie
  */
 app.post('/me/logout', UserRoutes.postMeLogout);
-
-if (ENV === DEV || ENV === STG) {
-    app.delete('/dev/unconf_user/:email', function(request, response) {
-        Unconf_User.findOneAndRemove({email:Validate.normalizeEmail(request.params.email)}, function(err, resp) {
-            if (err || !resp) {
-                return response.status(500).send(error('UNCONF_USER_DELETION_FAILURE', 'An unconfirmed user account failed to be deleted'));
-            } else {
-                return response.sendStatus(204);
-            }
-        });
-    });
-
-    app.delete('/dev/user/:email', function(request, response) {
-        User.findOneAndRemove({email:request.params.email}, function(err, user) {
-            if (err || !user) {
-                return reponse.status(404).send();
-            } else {
-                return response.sendStatus(204);
-            }
-        });
-    });
-}
 
 /*
  *   Method | POST
@@ -262,22 +218,6 @@ app.get('/listing/:uid', function(request,response){
 	    }
 	});
 });
-
-if (ENV === DEV || ENV === STG) {
-    app.delete('/dev/listing/:uid', function(request,response){
-        var uid = request.params.uid;
-        return Listings.Listing.findOneAndRemove({_id:uid}, function (err, listing) {
-            if (!err && listing) {
-                response.sendStatus(204);
-            } else {
-                return response.status(500).send(error(
-                    'UNKNOWN_SERVER_FAILURE',
-                    err
-                ));
-            }
-        });
-    });
-}
 
 function purgeSession(response) {
     response.clearCookie('connect.sid');

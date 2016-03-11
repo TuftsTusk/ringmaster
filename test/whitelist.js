@@ -74,12 +74,6 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/listing/:id/approve", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/listing/:id/quarrentine", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
         ];
-        var dev_endpoints = [
-            _("/dev/unconf_user/:email", ["DELETE"], [consts.ROLE_ROOT]),
-            _("/dev/user/:email", ["DELETE"], [consts.ROLE_ROOT]),
-            _("/dev/listing/:id", ["DELETE"], [consts.ROLE_ROOT])
-        ];
-        all_endpoints = all_endpoints.concat(dev_endpoints);
 
         for (var i=0; i<all_endpoints.length; i++) {
             var all_reqs = all_endpoints[i].generateAllPossibleRequests();
