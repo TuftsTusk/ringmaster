@@ -14,8 +14,6 @@ bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
 // Tusk Libraries
-var Validate = require('./lib/validation.js');
-var Utils = require('./lib/utils.js');
 var Consts = require('./lib/consts.js');
 
 // Load Middleware
@@ -67,7 +65,7 @@ var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb:/
 mongoose.connect(mongoUri);
 
 app.use(session({
-    secret: 'tuskislovetuskislife',
+    secret: Consts.COOKIE_SECRET,
     cookie: {
         expires: Consts.genDefaultExpires(),
         maxAge: Consts.getDefaultMaxAge()
@@ -173,7 +171,6 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-
 if (Consts.ENV === Consts.DEV || Consts.ENV === Consts.STG) {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
