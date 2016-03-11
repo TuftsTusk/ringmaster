@@ -13,11 +13,6 @@ mongoose = require('mongoose'),
 bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
 
-// load Schema
-var Listings = require('./lib/models/listing.js');
-var Unconf_User = require('./lib/models/unconf_user.js');
-var User = require('./lib/models/user.js');
-
 // Tusk Libraries
 var Validate = require('./lib/validation.js');
 var Utils = require('./lib/utils.js');
@@ -37,22 +32,16 @@ var UserRoutes = require('./lib/route/user.js');
 var ListingRoutes = require('./lib/route/listing.js');
 var TestingRoutes = require('./lib/route/testing.js');
 
-var ENV = Consts.ENV;
-var UNDEF = Consts.UNDEF;
-var UNKWN = Consts.UNKWN;
-var DEV = Consts.DEV;
-var STG = Consts.STG;
-var PROD = Consts.PROD;
 /* Possible values:
  *   undefined - NODE_ENV is not set. This should be treated as a FATAL error.
  * development - Development environment, enable debug logging, etc.
  *     staging - Staging server, perhaps allowing additional test code or authentication.
  *  production - Live, production environment that is public-facing. No debug output!
  */
-if (ENV < 0) {
-    if (ENV === UNDEF)
+if (Consts.ENV < 0) {
+    if (Consts.ENV === Consts.UNDEF)
         console.log("NODE_ENV variable not set. App will not execute until it is assigned a value.");
-    if (ENV === UNKWN)
+    if (Consts.ENV === Consts.UNKWN)
         console.log("NODE_ENV variable assigned to an unrecognized value.");
     console.log("Possible values: development, staging, production");
     process.exit(1);
@@ -170,59 +159,11 @@ app.get('/me/listing/filter/:filter', ListingRoutes.getMeListingByFilter);
 
 app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
 
-app.get('/alive', function(request, response){
-  return response.send('yes thank you');
-});
-
-function error(type, message) {
-    return JSON.stringify({
-        type: type,
-        message: message
-    });
-}
-
-function sendEnvConfigFailure(response) {
-    return response.status(500).send(error(
-        'ENVIRONMENT_MISCONFIGURATION_FAILURE',
-        'The local environment was configured incorrectly'
-    ));
-}
-
-function sendNotYetImplementedFailure(response) {
-    return response.status(501).send(error('NOT_YET_IMPLEMENTED_FAILURE', 'Not yet implemented'));
-}
-
-function ensureLoginSession(request) {
-    if (request.session.login &&
-        request.session.login.valid &&
-        request.session.login.who.id) {
-        return true;
-    }
-    return false;
-}
-
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);
 
-app.get('/listing/:uid', function(request,response){
-  response.set('Content-Type', 'application/json');
-	var uid = request.params.uid;
-	return Listing.Listing.find({_id:uid}, function (err, listing) {
-	    if (!err){
-	        response.status(200).send(JSON.stringify({
-                listing: listing
-            }));
-	    } else {
-            response.status(404).send('{}');
-	    }
-	});
-});
-
-function purgeSession(response) {
-    response.clearCookie('connect.sid');
-
-}
+app.get('/listing/:uid', ListingRoutes.getListingById);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -233,30 +174,23 @@ app.use(function(req, res, next) {
 
 // error handlers
 
-// TODO: check up on this
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
+if (Consts.ENV === Consts.DEV || Consts.ENV === Consts.STG) {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
     });
-  });
+} else {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: {}
+        });
+    });
 }
-
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
-
 
 app.listen(process.env.PORT || 80);
 
