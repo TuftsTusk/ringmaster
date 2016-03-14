@@ -7,6 +7,7 @@
     "test": "./purge.sh && mocha test/*.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.2.39",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "~1.13.2",
     "connect-mongo": "^1.1.0",
@@ -25,6 +26,7 @@
     "nodemailer": "^1.10.0",
     "serve-favicon": "~2.3.0",
     "supertest": "^1.1.0",
+    "utf8": "^2.1.1",
     "uuid": "^2.0.1",
     "validator": "^4.2.1"
   }

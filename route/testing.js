@@ -32,7 +32,7 @@ var PROD = Consts.PROD;
 
 var WHITELIST = [
     [/^\/user\/\w+\/?$/i , ["GET"], [Consts.ROLE_CONFIRMED_PUBLIC]],
-    [/^\/user\/\w+\/confirm\?[\w=&]+$/i, ["GET"], [Consts.ROLE_UNCONFIRMED_PUBLIC]],
+    [/^\/user\/\w+\/confirm\?[\w=&]+$/i, ["GET"], [Consts.ROLE_INVALID]],
     [/^\/user\/(([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))\/recover$/i, ["POST"], [Consts.ROLE_INVALID]],
     [/^\/me\/password\/?$/i, ["PUT"], [Consts.ROLE_INVALID]],
     [/^\/me\/register\/?$/i, ["POST"], [Consts.ROLE_INVALID]],
@@ -45,6 +45,7 @@ var WHITELIST = [
     [/^\/listing\/\w+\/approve\/?$/i, ["PUT"], [Consts.ROLE_MODERATOR_PUBLIC]],
     [/^\/listing\/\w+\/quarrentine\/?$/i, ["PUT"], [Consts.ROLE_MODERATOR_PUBLIC]],
     [/^\/listing\/\w+\/(?!approve|quarrentine)\/?$/i, ["PUT"], [Consts.ROLE_CONFIRMED_PUBLIC]],
+    [/^\/sign_s3\?[\w.=&\/]+$/i , ["GET"], [Consts.ROLE_INVALID]]
 ];
 
 //TODO: All test endpoints should require a high level role, and the
@@ -102,4 +103,3 @@ exports.ensureEnv = function(request, response, next) {
     }
     return response.status(403).send();
 }
-

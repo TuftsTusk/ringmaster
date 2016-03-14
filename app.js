@@ -13,6 +13,8 @@ mongoose = require('mongoose'),
 validator = require('validator'),
 bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
+aws = require('aws-sdk');
+utf8 = require('utf8');
 
 // load Schema
 var Listings = require('./models/listing.js');
@@ -216,6 +218,31 @@ app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
 
 app.get('/alive', function(request, response){
   return response.send('yes thank you');
+});
+
+var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+var S3_BUCKET = process.env.S3_BUCKET;
+
+
+app.get('/sign_s3', function(req, res){
+    aws.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
+    var s3 = new aws.S3();
+    var s3_params = {
+        Bucket: S3_BUCKET,
+        Key: uuid.v4(),
+        Expires: 60,
+        ContentType: req.query.file_type,
+        ACL: 'public-read'
+    };
+    s3.getSignedUrl('putObject', s3_params, function(err, data){
+        if(err){
+            res.status(500).send('AWS authentication Failure');
+        }
+            res.write(data);
+            res.end();
+        }
+    });
 });
 
 function error(type, message) {
