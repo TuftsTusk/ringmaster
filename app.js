@@ -82,8 +82,10 @@ app.use(session({
 
 app.use(TestingRoutes.ensureEnv);
 
-app.get ('/user/:id/confirm', UserRoutes.getUserConfirmById);
+app.get ('/user/:user_id/confirm', UserRoutes.getUserConfirmById);
 app.post('/user/:email/recover', UserRoutes.postUserRecoverByEmail);
+app.get ('/user/:user_id/listing', ListingRoutes.getListingByUserId);
+app.get ('/user/:user_id/listing/filter/:filter', ListingRoutes.getListingByUserId);
 
 app.post('/me/register', UserRoutes.postMeRegister);
 app.post('/me/logout', UserRoutes.postMeLogout);
@@ -93,8 +95,8 @@ app.put ('/me/password', UserRoutes.putMyPassword);
 app.get ('/me/listing', ListingRoutes.getMeListing);
 app.get ('/me/listing/filter/:filter', ListingRoutes.getMeListingByFilter);
 
-app.get ('/listing/:uid', ListingRoutes.getListingById);
-app.put ('/listing/:uid/:attr', ListingRoutes.putListingAttributeById);
+app.get ('/listing/:listing_id', ListingRoutes.getListingById);
+app.put ('/listing/:listing_id/:listing_attr', ListingRoutes.putListingAttributeById);
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);

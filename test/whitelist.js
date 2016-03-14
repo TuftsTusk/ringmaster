@@ -50,8 +50,8 @@ Endpoint.prototype.getRoles = function() {
 }
 var generateTestUrl = function(url) {
     return url.replace(/:id/i, "abc123")
-                    .replace(/:email/i, "some.jerk@tufts.edu")
-                    .replace(/:filters/i, JSON.stringify({}));
+                    .replace(/:email/i, encodeURI("some.jerk@tufts.edu"))
+                    .replace(/:filter/i, encodeURI(JSON.stringify({$in: ['value']})));
 }
 
 describe('Tusk Marketplace Whitelist', function() {
@@ -60,7 +60,8 @@ describe('Tusk Marketplace Whitelist', function() {
             return new Endpoint(url, methods, roles);
         }
         var all_endpoints = [
-            _("/user/:id", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/user/:id/listing", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
+            _("/user/:id/listing/filter/:filter", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/user/:id/confirm", ["GET"], [consts.ROLE_INVALID]),
             _("/user/:email/recover", ["POST"], [consts.ROLE_INVALID]),
             _("/me/password", ["PUT"], [consts.ROLE_INVALID]),
@@ -68,7 +69,7 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/me/login", ["POST"], [consts.ROLE_INVALID]),
             _("/me/logout", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
-            _("/me/listing/filter/:filters", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing/:id", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing/:id/approve", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
@@ -96,6 +97,10 @@ describe('Tusk Marketplace Whitelist', function() {
                 
                 var has_permission = testing.hasUrlPermission(t_url, method, role);
                 var t_url = generateTestUrl(url);
+                if (has_permission != expect_success) {
+                    console.log("ERR !"+all_reqs[j]);
+                    console.log(t_url);
+                }
                 expect(has_permission).to.equal(expect_success);
             }
         }
