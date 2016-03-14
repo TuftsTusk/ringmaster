@@ -240,8 +240,7 @@ app.get('/sign_s3', function(req, res){
       }
           res.write(data);
           res.end();
-      }
-  });
+      });
 });
 
 function error(type, message) {
