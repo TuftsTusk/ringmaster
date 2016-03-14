@@ -12,6 +12,8 @@ bodyParser = require('body-parser'),
 mongoose = require('mongoose'),
 bcrypt = require('bcrypt-nodejs'),
 mailer = require('nodemailer');
+aws = require('aws-sdk');
+utf8 = require('utf8');
 
 // Tusk Libraries
 var Consts = require('./lib/consts.js');
@@ -91,15 +93,38 @@ app.post('/me/register', UserRoutes.postMeRegister);
 app.post('/me/logout', UserRoutes.postMeLogout);
 app.post('/me/login', UserRoutes.postMeLogin);
 app.put ('/me/password', UserRoutes.putMyPassword);
-
 app.get ('/me/listing', ListingRoutes.getMeListing);
 app.get ('/me/listing/filter/:filter', ListingRoutes.getMeListingByFilter);
+
+app.get('/sign_s3', function(req, res){
+  var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+  var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+  var S3_BUCKET = process.env.S3_BUCKET;
+  aws.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
+  var s3 = new aws.S3();
+  var s3_params = {
+      Bucket: S3_BUCKET,
+      Key: uuid.v4(),
+      Expires: 60,
+      ContentType: req.query.file_type,
+      ACL: 'public-read'
+  };
+  s3.getSignedUrl('putObject', s3_params, function(err, data){
+      if(err){
+          res.status(500).send('AWS authentication Failure');
+      }
+          res.write(data);
+          res.end();
+      });
+});
 
 app.get ('/listing/:listing_id', ListingRoutes.getListingById);
 app.put ('/listing/:listing_id/:listing_attr', ListingRoutes.putListingAttributeById);
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);
+app.route('/listing/:uid')
+        .get(ListingRoutes.getListingById);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
