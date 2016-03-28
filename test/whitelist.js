@@ -72,9 +72,15 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing/:id", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
-            _("/listing/:id/approve", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
+            _("/listing/:id/approval", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/listing/:id/quarrentine", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
+            _("/listing/:id/flag", ["GET", "POST"], [consts.ROLE_MODERATOR_PUBLIC, consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/sign_s3", ["GET"], [consts.ROLE_INVALID])
         ];
+
+        if (all_endpoints.length != testing.WHITELIST.length)
+            return done("Not testing all whitelist endpoints!!!");
+        
 
         for (var i=0; i<all_endpoints.length; i++) {
             var all_reqs = all_endpoints[i].generateAllPossibleRequests();

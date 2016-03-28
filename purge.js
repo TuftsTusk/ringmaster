@@ -6,7 +6,7 @@ function purge() {
         (ENV == "development" || ENV == "staging")) {
         user_count = db.users.count({});
         unconf_user_count = db.unconf_users.count({});
-        listing_count = db.unconf_users.count({});
+        listing_count = db.listings.count({});
         session_count = db.sessions.count({});
         
         if (user_count > 0) {
