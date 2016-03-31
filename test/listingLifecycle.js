@@ -106,7 +106,8 @@ describe('Listing lifecycle', function() {
             makeMiscPost(cookie, {
                 type: 'MiscListing',
                 title: 'Hurr Durr',
-                description: 'Something for sale!@!!!!0!'
+                description: 'Something for sale!@!!!!0!',
+                price: 100
             }, function(err, res) {
                 if (err) done(err);
                 expect(res.status).to.equal(201);
@@ -131,7 +132,8 @@ describe('Listing lifecycle', function() {
             makeMiscPost(cookie, {
                 type: 'MiscListing',
                 title: 'Hurr Durr',
-                description: 'Something for sale!@!!!!0!'
+                description: 'Something for sale!@!!!!0!',
+                price: 100
             }, function(err, res) {
                 if(err) done(err);
                 expect(res.status).to.equal(201);
@@ -156,7 +158,8 @@ describe('Listing lifecycle', function() {
         m_listings.MiscListing.create({
             user_id: some_jerk._id,
             title: 'Hurr Durr',
-            description: 'Something for sale!@!!!!0!'
+            description: 'Something for sale!@!!!!0!',
+            price: 100
         }, function(err, listing) {
             if (err) done(err);
             else {
