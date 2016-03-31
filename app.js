@@ -15,6 +15,34 @@ mailer = require('nodemailer');
 aws = require('aws-sdk');
 utf8 = require('utf8');
 
+/*
+// create reusable transporter object using the default SMTP transport
+var mailOpts = {
+    host: 'smtp.mailgun.org',
+    auth: {
+        user: 'postmaster@sandbox4fc78d9d9e2c40a39d0245ebdfea84a7.mailgun.org',
+        pass: '3e699b7cdcd84a0a439000ce168c78d1'
+    }
+};
+var transporter = mailer.createTransport(mailOpts);
+
+// setup e-mail data with unicode symbols
+var mailOptions = {
+    from: '"Fred Foo 👥" <foo@blurdybloop.com>', // sender address
+    to: 'brian.cefali@gmail.com', // list of receivers
+    subject: 'Hello ✔', // Subject line
+    text: 'Hello world 🐴', // plaintext body
+    html: '<b>Hello world 🐴</b>' // html body
+};
+
+// send mail with defined transport object
+transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+        return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+});
+*/
 // Tusk Libraries
 var Consts = require('./lib/consts.js');
 
