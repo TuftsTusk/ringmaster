@@ -22,6 +22,7 @@
     "mocha": "^2.3.3",
     "mongodb": "^2.0.43",
     "mongoose": "^4.1.8",
+    "mongoose-seed": "^0.1.5",
     "morgan": "~1.6.1",
     "nodemailer": "^1.10.0",
     "serve-favicon": "~2.3.0",
