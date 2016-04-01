@@ -120,3 +120,5 @@ function seed() {
         });
     }
 }
+ENV="development";
+seed();
