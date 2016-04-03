@@ -114,9 +114,13 @@ function seed() {
             ]);
             seeder.clearModels(['User', 'MiscListing'], function() {
                 seeder.populateModels(data, function() {
+                    console.log("Databases populated.");
                     seeder.disconnect();
+                    process.exit(0);
                 });
             });
         });
+    } else {
+        console.log("ENV not set. Cannot seed db.");
     }
 }
