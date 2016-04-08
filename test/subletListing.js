@@ -138,7 +138,22 @@ describe('Sublet Listing Tests', function() {
     };
 
     it('Fail to create a sublet listing with no data', function(done) {
-        done();
+        var email = 'some.jerk@tufts.edu';
+        var pass = 'foo';
+        account.logInToAccount(email, pass, function(err, res) {
+            if (err) done(err);
+            expect(res.status).to.equal(204);
+            var cookie = res.headers['set-cookie'][0];
+            var re_sid = /sid=s%3A([^;\.]+)/;
+            var sid = re_sid.exec(cookie)[1];
+            sublet.makeSubletListing(cookie, {}, function(err, res) {
+                if (err) done(err);
+                expect(res.status).to.equal(400);
+                SessionStorage.destroy(sid);
+                purgeUsers();
+                done();
+            });
+        });
     });
 
     it('Successfully create a sublet listing', function(done) {
@@ -157,6 +172,32 @@ describe('Sublet Listing Tests', function() {
                     SessionStorage.destroy(sid);
                     purgeUsers();
                     done(err);
+                });
+            });
+        });
+    });
+
+    it('Successfully create and retrieve a sublet listing', function(done) {
+        var email = 'some.jerk@tufts.edu';
+        var pass = 'foo';
+        account.logInToAccount(email, pass, function(err, res) {
+            if (err) done(err);
+            expect(res.status).to.equal(204);
+            var cookie = res.headers['set-cookie'][0];
+            var re_sid = /sid=s%3A([^;\.]+)/;
+            var sid = re_sid.exec(cookie)[1];
+            sublet.makeSubletListing(cookie, TEST_DATA_A, function(err, res) {
+                if (err) done(err);
+                expect(res.status).to.equal(201);
+                var rsc_id = res.body.rsc_id;
+                sublet.getSubletListing(cookie, rsc_id, function(err, res) {
+                    if (err) done(err);
+                    expect(res.status).to.equal(200);
+                    deletePostFromId(rsc_id, function(err, res) {
+                        SessionStorage.destroy(sid);
+                        purgeUsers();
+                        done(err);
+                    });
                 });
             });
         });

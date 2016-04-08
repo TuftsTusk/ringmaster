@@ -16,3 +16,14 @@ exports.makeSubletListing = function(cookie, data, callback) {
         .set('Accept', 'application/json')
         .end(callback);
 }
+
+exports.getSubletListing = function(cookie, id, callback) {
+    request(app)
+        .get('/listing/'+id)
+        .send()
+        .set('Cookie', cookie)
+        .set('Accept', 'application/json')
+        .end(callback);
+
+}
+
