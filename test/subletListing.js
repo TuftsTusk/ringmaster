@@ -92,10 +92,10 @@ describe('Sublet Listing Tests', function() {
                 "rent": 667,
                 "title": "Jackson's room",
                 "photos": [
-                    "http:\/\/www.pawderosa.com\/images\/puppies.jpg",
-                    "http:\/\/www.pamperedpetz.net\/wp-content\/uploads\/2015\/09\/Puppy1.jpg",
-                    "http:\/\/cdn.skim.gs\/image\/upload\/v1456344012\/msi\/Puppy_2_kbhb4a.jpg",
-                    "https:\/\/pbs.twimg.com\/profile_images\/497043545505947648\/ESngUXG0.jpeg"
+                    {photo_url: "http:\/\/www.pawderosa.com\/images\/puppies.jpg"},
+                    {photo_url: "http:\/\/www.pamperedpetz.net\/wp-content\/uploads\/2015\/09\/Puppy1.jpg"},
+                    {photo_url: "http:\/\/cdn.skim.gs\/image\/upload\/v1456344012\/msi\/Puppy_2_kbhb4a.jpg"},
+                    {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/497043545505947648\/ESngUXG0.jpeg"}
                 ],
                 "op_details": {
                     "pre_furnished": true,
@@ -110,29 +110,29 @@ describe('Sublet Listing Tests', function() {
                 "rent": 750,
                 "title": "Conor's room",
                 "photos": [
-                    "http:\/\/www.fndvisions.org\/img\/cutecat.jpg",
-                    "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg",
-                    "http:\/\/www.findcatnames.com\/wp-content\/uploads\/2014\/09\/453768-cats-cute.jpg",
-                    "https:\/\/www.screensaversplanet.com\/img\/screenshots\/screensavers\/large\/cute-cats-1.png"
+                    {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                    {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"},
+                    {photo_url: "http:\/\/www.findcatnames.com\/wp-content\/uploads\/2014\/09\/453768-cats-cute.jpg"},
+                    {photo_url: "https:\/\/www.screensaversplanet.com\/img\/screenshots\/screensavers\/large\/cute-cats-1.png"}
                 ]
             }
         ],
         "common_area_photos": {
             "kitchen": [
-                "http:\/\/www.fndvisions.org\/img\/cutecat.jpg",
-                "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"
+                {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
             ],
             "living_room": [
-                "http:\/\/www.fndvisions.org\/img\/cutecat.jpg",
-                "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"
+                {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
             ],
             "bathroom": [
-                "http:\/\/www.fndvisions.org\/img\/cutecat.jpg",
-                "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"
+                {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
             ],
             "other": [
-                "http:\/\/www.fndvisions.org\/img\/cutecat.jpg",
-                "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"
+                {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
             ]
         }
     };
