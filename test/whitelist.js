@@ -71,7 +71,7 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
-            _("/listing/:id", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/listing/:id", ["GET", "POST"], [consts.ROLE_CONFIRMED_PUBLIC, consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing/:id/approval", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/listing/:id/quarrentine", ["PUT"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/listing/:id/flag", ["GET", "POST"], [consts.ROLE_MODERATOR_PUBLIC, consts.ROLE_CONFIRMED_PUBLIC]),

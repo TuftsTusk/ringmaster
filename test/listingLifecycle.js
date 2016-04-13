@@ -26,14 +26,24 @@ var makeMiscPost = function(cookie, body, callback) {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .end(callback);
-};
+}
+
+var getMiscPostById = function(cookie, id, callback) {
+    request(app)
+        .get('/listing/'+id)
+        .send({})
+        .set('Cookie', cookie)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .end(callback);
+}
 
 var deletePostFromId = function(id, callback) {
     m_listings.Listing.findOneAndRemove({_id:id}, function(err, listing) {
         var _status = (!err && listing) ? 204 : 500;
         callback(err, {"status" : _status});
     });
-};
+}
 
 describe('Listing lifecycle', function() {
     var salt = bcrypt.genSaltSync(10);
@@ -94,7 +104,7 @@ describe('Listing lifecycle', function() {
         });
     });
 
-    it('Successfully add and remove a single listing', function(done) {
+    it('Successfully add, request, and remove a single listing', function(done) {
         var email = 'some.jerk@tufts.edu';
         var pass = 'foo';
         account.logInToAccount(email, pass, function(err, res) {
@@ -111,11 +121,17 @@ describe('Listing lifecycle', function() {
             }, function(err, res) {
                 if (err) done(err);
                 expect(res.status).to.equal(201);
-                deletePostFromId(res.body.rsc_id, function(err, res) {
-                    SessionStorage.destroy(sid);
-                    purgeUsers();
-                    done();
-                });
+                var rsc_id = res.body.rsc_id;
+                getMiscPostById(cookie, rsc_id, function(err, res) {
+                    console.log(res.body);
+                    if (err) done(err);
+                    expect(res.status).to.equal(200);
+                    deletePostFromId(rsc_id, function(err, res) {
+                        SessionStorage.destroy(sid);
+                        purgeUsers();
+                        done();
+                    });
+                })
             });
         });
     });
