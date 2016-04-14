@@ -55,6 +55,57 @@ var generateTestUrl = function(url) {
 }
 
 describe('Tusk Marketplace Whitelist', function() {
+    it('Verify Public Listing Endpoints', function(done) {
+        var _ = function(url, methods, roles) {
+            return new Endpoint(url, methods, roles);
+        }
+        var all_endpoints = [
+            _("/user/:id/listing", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
+            _("/user/:id/listing/filter/:filter", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
+            _("/user/:id/confirm", ["GET"], [consts.ROLE_INVALID]),
+            _("/user/:email/recover", ["POST"], [consts.ROLE_INVALID]),
+            _("/me/password", ["PUT"], [consts.ROLE_INVALID]),
+            _("/me/register", ["POST"], [consts.ROLE_INVALID]),
+            _("/me/login", ["POST"], [consts.ROLE_INVALID]),
+            _("/me/logout", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/listing/:id", ["GET", "POST"], [consts.ROLE_CONFIRMED_PUBLIC, consts.ROLE_CONFIRMED_PUBLIC])
+        ];
+
+        for (var i=0; i<all_endpoints.length; i++) {
+            var all_reqs = all_endpoints[i].generateAllPossibleRequests();
+            var valid_reqs = all_endpoints[i].generateAllValidRequests();
+            for (var j=0; j<all_reqs.length; j++) {
+                var url = all_reqs[j][0];
+                var method = all_reqs[j][1];
+                var role = all_reqs[j][2];
+                var expect_success = false;
+                
+                for (var k=0; k<valid_reqs.length; k++) {
+                    var url_chk = url === valid_reqs[k][0];
+                    var method_chk = method === valid_reqs[k][1];
+                    var priv_chk = consts.checkPriv(role, valid_reqs[k][2]);
+                    if (url_chk && method_chk && priv_chk) {
+                        expect_success = true;
+                        break;
+                    }
+                }
+                
+                var has_permission = testing.hasUrlPermission(t_url, method, role);
+                var t_url = generateTestUrl(url);
+                if (has_permission != expect_success) {
+                    console.log("ERR !"+all_reqs[j]);
+                    console.log(t_url);
+                }
+                expect(has_permission).to.equal(expect_success);
+            }
+        }
+
+        done();
+    });
+
     it('Verify Public Endpoints', function(done) {
         var _ = function(url, methods, roles) {
             return new Endpoint(url, methods, roles);

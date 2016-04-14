@@ -123,7 +123,6 @@ describe('Listing lifecycle', function() {
                 expect(res.status).to.equal(201);
                 var rsc_id = res.body.rsc_id;
                 getMiscPostById(cookie, rsc_id, function(err, res) {
-                    console.log(res.body);
                     if (err) done(err);
                     expect(res.status).to.equal(200);
                     deletePostFromId(rsc_id, function(err, res) {
