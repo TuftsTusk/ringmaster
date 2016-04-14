@@ -71,7 +71,7 @@ describe('Sublet Listing Tests', function() {
     var TEST_DATA_A = {
         "user_id": "1",
         "apt_info": {
-            "address": "1000000 Packard ave",
+            "address": "92 Curtis St., Somerville MA 02144",
             "num_occupants": 4,
             "op_details": {
                 "pre_furnished": true,

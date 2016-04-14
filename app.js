@@ -145,8 +145,10 @@ app.get('/sign_s3', function(req, res){
     });
 });
 
-app.get ('/listing/:listing_id', ListingRoutes.getListingById);
-app.put ('/listing/:listing_id/:listing_attr', ListingRoutes.putListingAttributeById);
+app.route('/listing/:listing_id')
+    .get(ListingRoutes.getListingById)
+    .post(ListingRoutes.postListingById);
+app.put('/listing/:listing_id/:listing_attr', ListingRoutes.putListingAttributeById);
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);
