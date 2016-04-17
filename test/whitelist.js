@@ -62,12 +62,6 @@ describe('Tusk Marketplace Whitelist', function() {
         var all_endpoints = [
             _("/user/:id/listing", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
             _("/user/:id/listing/filter/:filter", ["GET"], [consts.ROLE_MODERATOR_PUBLIC]),
-            _("/user/:id/confirm", ["GET"], [consts.ROLE_INVALID]),
-            _("/user/:email/recover", ["POST"], [consts.ROLE_INVALID]),
-            _("/me/password", ["PUT"], [consts.ROLE_INVALID]),
-            _("/me/register", ["POST"], [consts.ROLE_INVALID]),
-            _("/me/login", ["POST"], [consts.ROLE_INVALID]),
-            _("/me/logout", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
