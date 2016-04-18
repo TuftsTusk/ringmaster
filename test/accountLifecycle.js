@@ -49,7 +49,7 @@ describe('Account lifecycle', function() {
         account.registerAccount('some.jerk@tufts.edu', 'foo', 'foo', function(err, res) {
             if (err) done(err);
             expect(res.status).to.equal(200);
-            account.deleteUnconfWithEmail(res.body.email, function(err, res) {
+            account.deleteUnconfWithId(res.body.id, function(err, res) {
                 expect(res.status).to.equal(204);
                 if (err) done(err);
                 done();
