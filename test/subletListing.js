@@ -70,6 +70,7 @@ describe('Sublet Listing Tests', function() {
 
     var TEST_DATA_A = {
         "user_id": "1",
+        "type": "SubletListing",
         "apt_info": {
             "address": "92 Curtis St., Somerville MA 02144",
             "num_occupants": 4,
