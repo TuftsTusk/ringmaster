@@ -51,6 +51,154 @@ var data = [
         ]
     },
     {
+        model: 'SubletListing',
+        documents: [
+            {
+                user_id: "1",
+                type: "SubletListing",
+                apt_info: {
+                    address: "92 Curtis St., Somerville MA 02144",
+                    lat: 42.4099,
+                    lng: -71.1198,
+                    num_occupants: 4,
+                    op_details: {
+                        pre_furnished: true,
+                        incl_air_conditioning: true,
+                        incl_washing_machine: true,
+                        incl_dryer: true,
+                        incl_dishwasher: true,
+                        smoking_permitted: true,
+                        handicap_accessible: true,
+                        on_premises_parking: true,
+                        pets_permitted: true
+                    }
+                },
+                bedrooms: [
+                    {
+                        date_start: "2016-05-23T00:00:00.000Z",
+                        date_end: "2016-08-23T00:00:00.000Z",
+                        rent: 667,
+                        title: "Jackson's room",
+                        photos: [
+                            {photo_url: "http:\/\/www.pawderosa.com\/images\/puppies.jpg"},
+                            {photo_url: "http:\/\/www.pamperedpetz.net\/wp-content\/uploads\/2015\/09\/Puppy1.jpg"},
+                            {photo_url: "http:\/\/cdn.skim.gs\/image\/upload\/v1456344012\/msi\/Puppy_2_kbhb4a.jpg"},
+                            {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/497043545505947648\/ESngUXG0.jpeg"}
+                        ],
+                        op_details: {
+                            pre_furnished: true,
+                            incl_air_conditioning: true
+                        },
+                        date_start_is_flexible: true,
+                        date_end_is_flexible: true
+                    },
+                    {
+                        date_start: "2016-05-14T00:00:00.000Z",
+                        date_end: "2016-09-10T00:00:00.000Z",
+                        rent: 750,
+                        title: "Conor's room",
+                        photos: [
+                            {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                            {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"},
+                            {photo_url: "http:\/\/www.findcatnames.com\/wp-content\/uploads\/2014\/09\/453768-cats-cute.jpg"},
+                            {photo_url: "https:\/\/www.screensaversplanet.com\/img\/screenshots\/screensavers\/large\/cute-cats-1.png"}
+                        ]
+                    }
+                ],
+                common_area_photos: {
+                    kitchen: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    living_room: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    bathroom: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    other: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ]
+                }
+            },
+            {
+                user_id: "1",
+                type: "SubletListing",
+                apt_info: {
+                    address: "92 Curtis St., Somerville MA 02144",
+                    lat: 42.4059,
+                    lng: -71.1198,
+                    num_occupants: 4,
+                    op_details: {
+                        pre_furnished: true,
+                        incl_air_conditioning: true,
+                        incl_washing_machine: true,
+                        incl_dryer: true,
+                        incl_dishwasher: true,
+                        smoking_permitted: true,
+                        handicap_accessible: true,
+                        on_premises_parking: true,
+                        pets_permitted: true
+                    }
+                },
+                bedrooms: [
+                    {
+                        date_start: "2016-05-23T00:00:00.000Z",
+                        date_end: "2016-08-23T00:00:00.000Z",
+                        rent: 667,
+                        title: "Jackson's room",
+                        photos: [
+                            {photo_url: "http:\/\/www.pawderosa.com\/images\/puppies.jpg"},
+                            {photo_url: "http:\/\/www.pamperedpetz.net\/wp-content\/uploads\/2015\/09\/Puppy1.jpg"},
+                            {photo_url: "http:\/\/cdn.skim.gs\/image\/upload\/v1456344012\/msi\/Puppy_2_kbhb4a.jpg"},
+                            {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/497043545505947648\/ESngUXG0.jpeg"}
+                        ],
+                        op_details: {
+                            pre_furnished: true,
+                            incl_air_conditioning: true
+                        },
+                        date_start_is_flexible: true,
+                        date_end_is_flexible: true
+                    },
+                    {
+                        date_start: "2016-05-14T00:00:00.000Z",
+                        date_end: "2016-09-10T00:00:00.000Z",
+                        rent: 750,
+                        title: "Conor's room",
+                        photos: [
+                            {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                            {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"},
+                            {photo_url: "http:\/\/www.findcatnames.com\/wp-content\/uploads\/2014\/09\/453768-cats-cute.jpg"},
+                            {photo_url: "https:\/\/www.screensaversplanet.com\/img\/screenshots\/screensavers\/large\/cute-cats-1.png"}
+                        ]
+                    }
+                ],
+                common_area_photos: {
+                    kitchen: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    living_room: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    bathroom: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ],
+                    other: [
+                        {photo_url: "http:\/\/www.fndvisions.org\/img\/cutecat.jpg"},
+                        {photo_url: "https:\/\/pbs.twimg.com\/profile_images\/567285191169687553\/7kg_TF4l.jpeg"}
+                    ]
+                }
+            }
+
+        ]
+    },
+    {
         model: 'MiscListing',
         documents: [
             {

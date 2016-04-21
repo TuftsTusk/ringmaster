@@ -125,7 +125,6 @@ describe('Listing lifecycle', function() {
                 getMiscPostById(cookie, rsc_id, function(err, res) {
                     if (err) done(err);
                     expect(res.status).to.equal(200);
-                    console.log(res.body);
                     deletePostFromId(rsc_id, function(err, res) {
                         SessionStorage.destroy(sid);
                         purgeUsers();

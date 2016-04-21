@@ -12,6 +12,13 @@ exports.deleteWithEmail = function(email, callback) {
     });
 };
 
+exports.deleteUnconfWithId = function(id, callback) {
+    m_unconf_user.findOneAndRemove({_id:id}, function(err, user) {
+        var _status =(!err && user) ? 204 : 500;
+        callback(err, {"status" : _status});
+    });
+};
+
 exports.deleteUnconfWithEmail = function(email, callback) {
     m_unconf_user.findOneAndRemove({email:email}, function(err, user) {
         var _status =(!err && user) ? 204 : 500;
