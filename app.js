@@ -92,6 +92,7 @@ app.get ('/user/:user_id/listing', ListingRoutes.getListingByUserId);
 app.post('/me/register', UserRoutes.postMeRegister);
 app.post('/me/logout', UserRoutes.postMeLogout);
 app.post('/me/login', UserRoutes.postMeLogin);
+app.post('/me/resendConfirmation', UserRoutes.postMeResendConfirmation);
 app.put ('/me/password', UserRoutes.putMyPassword);
 app.get ('/me/listing', ListingRoutes.getMeListing);
 

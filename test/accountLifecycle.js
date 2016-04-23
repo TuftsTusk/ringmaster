@@ -83,7 +83,38 @@ describe('Account lifecycle', function() {
             });
         });
     });
-
+    it('Should send user not confirmed failure on non confirmed user login attempt', function(done) {
+        var email = 'some.jerk@tufts.edu';
+        var pass = 'foo';
+        var confirmpass = 'foo';
+        account.registerAccount(email, pass, confirmpass, function(err, res) {
+            if (err) done(err);
+            expect(res.status).to.equal(200);
+            var id = res.body.id;
+            var key = res.body.key;
+            account.logInToAccount(email, pass, function(err, res) {
+                if (err) done(err);
+                expect(res.text).to.equal('{"type":"USER_NOT_CONFIRMED_FAILURE","message":"Please check your email and confirm your account"}');
+                account.confirmAccount(id, key, function(err, res) {
+                    if (err) done(err);
+                    expect(res.status).to.equal(204);
+                    account.logInToAccount(email, pass, function(err, res) {
+                        if (err) done(err);
+                        expect(res.status).to.equal(204);
+                        account.logOutOfAccount(res.headers['set-cookie'][0], function(err, res) {
+                            if (err) done(err);
+                            expect(res.status).to.equal(204);
+                            account.deleteWithEmail(email, function(err, res) {
+                                if (err) done(err);
+                                expect(res.status).to.equal(204);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
     it('Successfully recover a user password', function(done) {
         var email = 'some.jerk@tufts.edu';
         var pass = 'foo';
@@ -113,4 +144,3 @@ describe('Account lifecycle', function() {
         });
     });
 });
-

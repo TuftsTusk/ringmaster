@@ -76,7 +76,7 @@ describe('Tusk Marketplace Whitelist', function() {
                 var method = all_reqs[j][1];
                 var role = all_reqs[j][2];
                 var expect_success = false;
-                
+
                 for (var k=0; k<valid_reqs.length; k++) {
                     var url_chk = url === valid_reqs[k][0];
                     var method_chk = method === valid_reqs[k][1];
@@ -86,7 +86,7 @@ describe('Tusk Marketplace Whitelist', function() {
                         break;
                     }
                 }
-                
+
                 var has_permission = testing.hasUrlPermission(t_url, method, role);
                 var t_url = generateTestUrl(url);
                 if (has_permission != expect_success) {
@@ -111,6 +111,7 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/user/:email/recover", ["POST"], [consts.ROLE_INVALID]),
             _("/me/password", ["PUT"], [consts.ROLE_INVALID]),
             _("/me/register", ["POST"], [consts.ROLE_INVALID]),
+            _("/me/resendConfirmation", ["POST"], [consts.ROLE_INVALID]),
             _("/me/login", ["POST"], [consts.ROLE_INVALID]),
             _("/me/logout", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
@@ -125,7 +126,7 @@ describe('Tusk Marketplace Whitelist', function() {
 
         if (all_endpoints.length != testing.WHITELIST.length)
             return done("Not testing all whitelist endpoints!!!");
-        
+
 
         for (var i=0; i<all_endpoints.length; i++) {
             var all_reqs = all_endpoints[i].generateAllPossibleRequests();
@@ -135,7 +136,7 @@ describe('Tusk Marketplace Whitelist', function() {
                 var method = all_reqs[j][1];
                 var role = all_reqs[j][2];
                 var expect_success = false;
-                
+
                 for (var k=0; k<valid_reqs.length; k++) {
                     var url_chk = url === valid_reqs[k][0];
                     var method_chk = method === valid_reqs[k][1];
@@ -145,7 +146,7 @@ describe('Tusk Marketplace Whitelist', function() {
                         break;
                     }
                 }
-                
+
                 var has_permission = testing.hasUrlPermission(t_url, method, role);
                 var t_url = generateTestUrl(url);
                 if (has_permission != expect_success) {
@@ -159,4 +160,3 @@ describe('Tusk Marketplace Whitelist', function() {
         done();
     });
 });
-
