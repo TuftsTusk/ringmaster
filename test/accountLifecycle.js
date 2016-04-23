@@ -115,6 +115,39 @@ describe('Account lifecycle', function() {
             });
         });
     });
+
+    it('Should be able to resend user confirmation info', function(done) {
+        var email = 'some.jerk@tufts.edu';
+        var pass = 'foo';
+        var confirmpass = 'foo';
+        account.registerAccount(email, pass, confirmpass, function(err, res) {
+            if (err) done(err);
+            expect(res.status).to.equal(200);
+            var id = res.body.id;
+            var key = res.body.key;
+            account.resendConfirmation(email, function(err, res) {
+                if (err) done(err);
+                expect(res.status).to.equal(200);
+                account.confirmAccount(id, key, function(err, res) {
+                    if (err) done(err);
+                    expect(res.status).to.equal(204);
+                    account.logInToAccount(email, pass, function(err, res) {
+                        if (err) done(err);
+                        expect(res.status).to.equal(204);
+                        account.logOutOfAccount(res.headers['set-cookie'][0], function(err, res) {
+                            if (err) done(err);
+                            expect(res.status).to.equal(204);
+                            account.deleteWithEmail(email, function(err, res) {
+                                if (err) done(err);
+                                expect(res.status).to.equal(204);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
     it('Successfully recover a user password', function(done) {
         var email = 'some.jerk@tufts.edu';
         var pass = 'foo';

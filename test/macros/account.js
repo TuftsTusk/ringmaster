@@ -38,6 +38,16 @@ exports.registerAccount = function(email, password, confirmpass, callback) {
         .end(callback);
 }
 
+exports.resendConfirmation = function(email, callback) {
+    request(app)
+        .post('/me/resendConfirmation')
+        .send({
+            email: email
+        })
+        .set('Accept', 'application/json')
+        .end(callback);
+}
+
 exports.logInToAccount = function(email, password, callback) {
     request(app)
         .post('/me/login')
