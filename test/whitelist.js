@@ -113,7 +113,7 @@ describe('Tusk Marketplace Whitelist', function() {
             _("/me/register", ["POST"], [consts.ROLE_INVALID]),
             _("/me/resendConfirmation", ["POST"], [consts.ROLE_INVALID]),
             _("/me/login", ["POST"], [consts.ROLE_INVALID]),
-            _("/me/logout", ["POST"], [consts.ROLE_CONFIRMED_PUBLIC]),
+            _("/me/logout", ["POST"], [consts.ROLE_INVALID]),
             _("/me/listing", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/me/listing/filter/:filter", ["GET"], [consts.ROLE_CONFIRMED_PUBLIC]),
             _("/listing", ["GET", "POST"], [consts.ROLE_INVALID, consts.ROLE_CONFIRMED_PUBLIC]),
