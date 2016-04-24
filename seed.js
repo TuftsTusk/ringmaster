@@ -54,7 +54,7 @@ var data = [
         model: 'SubletListing',
         documents: [
             {
-                user_id: "1",
+                user_id: DEFAULT_USER_IDS[0],
                 type: "SubletListing",
                 apt_info: {
                     address: "92 Curtis St., Somerville MA 02144",
@@ -125,7 +125,7 @@ var data = [
                 }
             },
             {
-                user_id: "1",
+                user_id: DEFAULT_USER_IDS[1],
                 type: "SubletListing",
                 apt_info: {
                     address: "92 Curtis St., Somerville MA 02144",
