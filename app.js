@@ -125,6 +125,8 @@ app.put('/listing/:listing_id/:listing_attr', ListingRoutes.putListingAttributeB
 app.route('/listing')
     .post(ListingRoutes.postListing)
     .get(ListingRoutes.getListing);
+    app.route('/listing/:listing_id/contactSeller')
+        .post(ListingRoutes.contactListingSeller);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
