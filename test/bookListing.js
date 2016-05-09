@@ -72,6 +72,7 @@ describe('Book Listing Tests', function() {
         user_id: "1",
         type: "BookListing",
         title: "Fear and Loathing in Las Vegas",
+        price: 14.99,
         authors: ["Hunter S. Thompson"],
         edition: "Second Vintage Books Edition",
         isbn: "ISBN: 0-679-78589-2"
