@@ -258,8 +258,13 @@ function seed() {
         seeder.connect('mongodb://localhost/tusk', function() {
             seeder.loadModels([
                 'lib/models/user.js',
-                'lib/models/listing.js'
+                'lib/models/listings/listing.js',
+                'lib/models/listings/misc_listing.js',
+                'lib/models/listings/book_listing.js',
+                'lib/models/listings/sublet_listing.js',
+                'lib/models/listings/furniture_listing.js'
             ]);
+            //TODO: clear all models???
             seeder.clearModels(['User', 'MiscListing'], function() {
                 seeder.populateModels(data, function() {
                     console.log("Databases populated.");
