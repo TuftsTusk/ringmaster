@@ -171,7 +171,7 @@ describe('Listing lifecycle', function() {
         var mod_email = 'hot.bod.mod@tufts.edu';
         var pass = 'foo';
 
-        misc_listing.model.MiscListing.create({
+        misc_listing.model.create({
             user_id: some_jerk._id,
             title: 'Hurr Durr',
             description: 'Something for sale!@!!!!0!',

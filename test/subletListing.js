@@ -71,8 +71,10 @@ describe('Sublet Listing Tests', function() {
     var TEST_DATA_A = {
         "user_id": "1",
         "type": "SubletListing",
+        "geotag": {
+            "address": "92 Curtis St., Somerville MA 02144"
+        },
         "apt_info": {
-            "address": "92 Curtis St., Somerville MA 02144",
             "num_occupants": 4,
             "op_details": {
                 "pre_furnished": true,
