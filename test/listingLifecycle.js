@@ -5,7 +5,8 @@ var app = require('../app.js');
 var moderator = require('./macros/moderator.js');
 var account = require('./macros/account.js');
 var database = require('./macros/database.js');
-var m_listings = require('../lib/models/listing.js');
+var m_listings = require('../lib/models/listings/listing.js');
+var misc_listing = require('../lib/models/listings/misc_listing.js');
 var m_user = require('../lib/models/user.js');
 var Utils = require('../lib/utils.js');
 var Consts = require('../lib/consts.js');
@@ -39,7 +40,7 @@ var getMiscPostById = function(cookie, id, callback) {
 }
 
 var deletePostFromId = function(id, callback) {
-    m_listings.Listing.findOneAndRemove({_id:id}, function(err, listing) {
+    m_listings.model.findOneAndRemove({_id:id}, function(err, listing) {
         var _status = (!err && listing) ? 204 : 500;
         callback(err, {"status" : _status});
     });
@@ -170,7 +171,7 @@ describe('Listing lifecycle', function() {
         var mod_email = 'hot.bod.mod@tufts.edu';
         var pass = 'foo';
 
-        m_listings.MiscListing.create({
+        misc_listing.model.create({
             user_id: some_jerk._id,
             title: 'Hurr Durr',
             description: 'Something for sale!@!!!!0!',
