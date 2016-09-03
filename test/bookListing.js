@@ -6,7 +6,7 @@ var moderator = require('./macros/moderator.js');
 var account = require('./macros/account.js');
 var book = require('./macros/book.js');
 var database = require('./macros/database.js');
-var m_listings = require('../lib/models/listing.js');
+var m_listings = require('../lib/models/listings/listing.js');
 var m_user = require('../lib/models/user.js');
 var Utils = require('../lib/utils.js');
 var Consts = require('../lib/consts.js');
@@ -29,7 +29,7 @@ describe('Book Listing Tests', function() {
     var saves = 0;
     
     var deletePostFromId = function(id, callback) {
-        m_listings.Listing.findOneAndRemove({_id:id}, function(err, listing) {
+        m_listings.model.findOneAndRemove({_id:id}, function(err, listing) {
             var _status = (!err && listing) ? 204 : 500;
             callback(err, {"status" : _status});
         });

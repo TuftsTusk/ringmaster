@@ -2,14 +2,10 @@ var expect = require('expect.js');
 var assert = require('assert');
 var request = require('supertest');
 var app = require('../../app.js');
-var m_listings = require('../../lib/models/listing.js');
-
-exports.__getBookListing = function(id, callback) {
-    m_listings.BookListing.findOne({_id:id}, callback);
-}
+var book_listing = require('../../lib/models/listings/book_listing.js');
 
 exports.makeBookListing = function(cookie, data, callback) {
-    data.type = m_listings.BOOK;
+    data.type = book_listing.name;
     request(app)
         .post('/listing')
         .send(data)
