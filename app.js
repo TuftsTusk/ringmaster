@@ -48,7 +48,7 @@ if (Consts.ENV < 0) {
     process.exit(1);
 }
 
-var whitelist = ['http://localhost:8080', 'https://tuskdumbo.herokuapp.com', 'http://tuskmarketplace.com', 'https://tuskmarketplace.com', 'https://tuskdumbostaging.herokuapp.com'];
+var whitelist = ['http://localhost:8080', 'https://tuskdumbo.herokuapp.com', 'http://tuskmarketplace.com', 'https://tuskmarketplace.com', 'https://tuskdumbostaging.herokuapp.com', 'http://tuskbeta.herokuapp.com', 'https://tuskbeta.herokuapp.com'];
 var corsOptions = {
   origin: function(origin, callback){
     var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
