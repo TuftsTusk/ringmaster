@@ -30,8 +30,27 @@ describe('Pagination Tests', function() {
     var hot_bod_mod = null;
     var sadmin = null;
     var saves = 0;
+    var fake_data = null;
 
     beforeEach(function(done) {
+        var words = ['Great', 'Modular', 'Telephone', 'Wristwatch', 'Maniac', 'Carnivore', 'the', 'Only', 'Harmless', 'Devouring', 'Manticore', 'from', 'the', 'Depths', 'of', 'Hell'];
+        var misc_listings = [];
+        for (var i = 0; i < 1000; i++) {
+            var title = words[random(0, words.length)] + ' ' + words[random(0, words.length)] + ' ' + words[random(0, words.length)]
+            var price = random(1, 1000);
+            var desc = '';
+            for (var j=0; j<30; j++) {
+                desc += words[random(0, words.length)] + ' ';
+            }
+            var photos = [];
+            var misc = {
+                'title': title,
+                'price': price,
+                'description': desc,
+                'photo_urls': photos
+            };
+        }
+
         m_user.create([{
             email:'some.jerk@tufts.edu',
             passwordSalt: salt,
@@ -51,27 +70,14 @@ describe('Pagination Tests', function() {
             some_jerk = users[0];
             hot_bod_mod = users[1];
             sadmin = users[2];
-            done(err);
-        });
-
-        var words = ['Great', 'Modular', 'Telephone', 'Wristwatch', 'Maniac', 'Carnivore', 'the', 'Only', 'Harmless', 'Devouring', 'Manticore', 'from', 'the', 'Depths', 'of', 'Hell'];
-        var misc_listings = [];
-        for (var i = 0; i < 1000; i++) {
-            var title = words[random(0, words.length)] + ' ' + words[random(0, words.length)] + ' ' + words[random(0, words.length)]
-            var price = random(1, 1000);
-            var desc = '';
-            for (var j=0; j<30; j++) {
-                desc += words[random(0, words.length)] + ' ';
+            if (err) done(err);
+            else {
+                m_misc_listing.model.create(misc_listings, function(err, listings) {
+                    fake_data = listings;
+                    done(err);
+                });
             }
-            var photos = [];
-            var misc = {
-                'title': title,
-                'price': price,
-                'description': desc,
-                'photo_urls': photos
-            };
-        }
-        m_misc_listing.create(misc_listings);
+        });
     });
 
     var purgeUsers = function(done) {
@@ -81,6 +87,9 @@ describe('Pagination Tests', function() {
             hot_bod_mod.remove();
         if (sadmin != null)
             sadmin.remove();
+        if (fake_data != null)
+            for (var f in fake_data)
+                f.remove();
     }
 
     it('Successfully request the same results using an archived search', function(done) {
@@ -93,8 +102,14 @@ describe('Pagination Tests', function() {
             var re_sid = /sid=s%3A([^;\.]+)/;
             var sid = re_sid.exec(cookie)[1];
             var query = {};
-            paginate.getListingsWithQuery(query, function(err, res) {
-                var listings = res.body;
+            paginate.getListingsWithQuery(query, cookie, function(err, res) {
+                if (err) done(err);
+                else {
+                    var listings = res.body;
+                    console.log(listings);
+                    purgeUsers();
+                    done();
+                }
             });
         });
     });

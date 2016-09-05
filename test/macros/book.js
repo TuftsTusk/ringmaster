@@ -17,10 +17,9 @@ exports.makeBookListing = function(cookie, data, callback) {
 exports.getBookListing = function(cookie, id, callback) {
     request(app)
         .get('/listing/'+id)
-        .send()
+        .send({})
         .set('Cookie', cookie)
         .set('Accept', 'application/json')
         .end(callback);
-
 }
 

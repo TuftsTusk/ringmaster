@@ -3,9 +3,9 @@ var assert = require('assert');
 var request = require('supertest');
 var app = require('../../app.js');
 
-exports.getListingsWithQuery = function(query_obj, callback) {
+exports.getListingsWithQuery = function(query_obj, cookie, callback) {
     request(app)
-        .get('/listing)
+        .get('/listing')
         .query(query_obj)
         .send({})
         .set('Cookie', cookie)
