@@ -21,7 +21,7 @@ var SessionStorage = new MongoStore({
 });
 
 function random(min, max) {
-    return Math.random() * (max - min) + min;
+    return Math.trunc(Math.random() * (max - min) + min);
 }
 
 describe('Pagination Tests', function() {
@@ -36,7 +36,7 @@ describe('Pagination Tests', function() {
         var words = ['Great', 'Modular', 'Telephone', 'Wristwatch', 'Maniac', 'Carnivore', 'the', 'Only', 'Harmless', 'Devouring', 'Manticore', 'from', 'the', 'Depths', 'of', 'Hell'];
         var misc_listings = [];
         for (var i = 0; i < 1000; i++) {
-            var title = words[random(0, words.length)] + ' ' + words[random(0, words.length)] + ' ' + words[random(0, words.length)]
+            var title = words[random(0, words.length)] + ' ' + words[random(0, words.length)] + ' ' + words[random(0, words.length)];
             var price = random(1, 1000);
             var desc = '';
             for (var j=0; j<30; j++) {
@@ -49,7 +49,9 @@ describe('Pagination Tests', function() {
                 'description': desc,
                 'photo_urls': photos
             };
+            misc_listings.push(misc);
         }
+
 
         m_user.create([{
             email:'some.jerk@tufts.edu',
@@ -72,7 +74,11 @@ describe('Pagination Tests', function() {
             sadmin = users[2];
             if (err) done(err);
             else {
-                m_misc_listing.model.create(misc_listings, function(err, listings) {
+                with_ids = misc_listings.map(function(elem) {
+                    elem['user_id'] = users[random(0, users.length)]._id;
+                    return elem;
+                });
+                m_misc_listing.model.create(with_ids, function(err, listings) {
                     fake_data = listings;
                     done(err);
                 });
@@ -89,7 +95,20 @@ describe('Pagination Tests', function() {
             sadmin.remove();
         if (fake_data != null)
             for (var f in fake_data)
-                f.remove();
+                fake_data[f].remove();
+    }
+
+    function recursiveSearch(query, cookie, count, done) {
+        if (count == 0) {
+            
+        } else {
+            paginate.getListingsWithQuery(query, cookie, function(err, res) {
+                if (err) done(err);
+                else {
+                    
+                }
+            });
+        }
     }
 
     it('Successfully request the same results using an archived search', function(done) {
@@ -102,15 +121,30 @@ describe('Pagination Tests', function() {
             var re_sid = /sid=s%3A([^;\.]+)/;
             var sid = re_sid.exec(cookie)[1];
             var query = {};
+
+            recursiveSearch(query, cookie, 5, done);
+
+            /*
             paginate.getListingsWithQuery(query, cookie, function(err, res) {
                 if (err) done(err);
                 else {
-                    var listings = res.body;
-                    console.log(listings);
-                    purgeUsers();
-                    done();
+                    var listings = res.body.listings;
+                    var s_id = res.body.search_id;
+                    query.search_id = s_id;
+                    paginate.getListingsWithQuery(query, cookie, function(err, res2) {
+                        if (err) done(err);
+                        else {
+                            var listings2 = res2.body.listings;
+                            var s_id2 = res2.body.search_id;
+                            expect(s_id).to.equal(s_id2);
+                            expect(listings.length).to.equal(listings2.length);
+                            purgeUsers();
+                            done();
+                        }
+                    });
                 }
             });
+            */
         });
     });
 
