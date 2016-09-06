@@ -70,9 +70,9 @@ mongoose.connect(mongoUri);
 app.use(session({
     secret: Consts.COOKIE_SECRET,
     cookie: {
-        expires: Consts.genDefaultExpires(),
         maxAge: Consts.getDefaultMaxAge()
     },
+    secure: false,
     name: 'sid',
     saveUninitialized: false,
     resave: true,
