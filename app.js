@@ -71,8 +71,7 @@ app.use(session({
     secret: Consts.COOKIE_SECRET,
     cookie: {
         maxAge: Consts.getDefaultMaxAge(),
-        httpOnly:false,
-        domain:'ringmasterstaging.herokuapp.com'
+        httpOnly:false
     },
     secure: false,
     name: 'sid',
