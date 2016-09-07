@@ -75,7 +75,7 @@ app.use(session({
     },
     secure: false,
     name: 'sid',
-    saveUninitialized: true,
+    saveUninitialized: false,
     resave: true,
     rolling: true,
     unset: 'destroy',
