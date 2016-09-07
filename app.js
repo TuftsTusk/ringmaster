@@ -72,7 +72,7 @@ app.use(session({
     cookie: {
         maxAge: Consts.getDefaultMaxAge(),
         httpOnly:false,
-        domain:'tuskmarketplace.com'
+        domain:'ringmasterstaging.herokuapp.com'
     },
     secure: false,
     name: 'sid',
