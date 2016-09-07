@@ -71,7 +71,8 @@ app.use(session({
     secret: Consts.COOKIE_SECRET,
     cookie: {
         maxAge: Consts.getDefaultMaxAge(),
-        httpOnly:false
+        httpOnly:false,
+        domain:'tuskmarketplace.com'
     },
     secure: false,
     name: 'sid',
