@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "./purge.sh && mocha test/*.js"
+    "test": "npm install && ./purge.sh && mocha test/*.js"
   },
   "dependencies": {
     "aws-sdk": "^2.2.39",
