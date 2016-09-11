@@ -48,6 +48,14 @@ var postMiscPostById = function(cookie, id, data, callback) {
         .end(callback);
 }
 
+var getListings = function(cookie, pageNum, callback) {
+    request(app)
+        .get('/listing?pageNum='+pageNum)
+        .set('Cookie', cookie)
+        .set('Accept', 'application/json')
+        .end(callback);
+}
+
 var deletePostFromId = function(id, callback) {
     m_listings.model.findOneAndRemove({_id:id}, function(err, listing) {
         var _status = (!err && listing) ? 204 : 500;
@@ -94,6 +102,49 @@ describe('Listing lifecycle', function() {
         if (sadmin != null)
             sadmin.remove();
     }
+
+    it ('Should paginate, when 1 listing existings page 1 sould contain 1 listing, page two should contain none', function(done){
+        var email = 'some.jerk@tufts.edu';
+        var pass = 'foo';
+        account.logInToAccount(email, pass, function(err, res) {
+            if (err) done(err);
+            expect(res.status).to.equal(204);
+            var cookie = res.headers['set-cookie'][0];
+            var re_sid = /sid=s%3A([^;\.]+)/;
+            var sid = re_sid.exec(cookie)[1];
+            makeMiscPost(cookie, {
+                type: 'MiscListing',
+                title: 'Hurr Durr',
+                description: 'Something for sale!@!!!!0!',
+                price: 100
+            }, function(err, res) {
+                if (err) done(err);
+                expect(res.status).to.equal(201);
+                var rsc_id = res.body.rsc_id;
+                getMiscPostById(cookie, rsc_id, function(err, res) {
+                    if (err) done(err);
+                    expect(res.status).to.equal(200);
+                    var pageNum = 1;
+                    getListings(cookie, pageNum, function(err, res) {
+                        if(err) done(err);
+                        expect(res.status).to.equal(200);
+                        expect (res.res.body.length).to.equal(1);
+                        pageNum = 2;
+                        getListings(cookie, pageNum, function(err, res) {
+                            if(err) done(err);
+                            expect(res.status).to.equal(200);
+                            expect (res.res.body.length).to.equal(0);
+                            deletePostFromId(rsc_id, function(err, res) {
+                                SessionStorage.destroy(sid);
+                                purgeUsers();
+                                done();
+                            });
+                        });
+                    });
+                })
+            });
+        });
+    });
 
     it('Fail to add a listing with no data', function(done) {
         var email = 'some.jerk@tufts.edu';
@@ -247,4 +298,3 @@ describe('Listing lifecycle', function() {
         });
     });
 });
-
